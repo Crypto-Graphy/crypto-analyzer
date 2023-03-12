@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "coinbase_transactions",
+    "kraken_ledgers",
+    "coin_gecko",
+    "crypto_analyzer_server",
+    "csv_runner",
+]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace.dependencies]
+rust_decimal = { version = "1.28.1", features = ["serde", "serde-with-str"] }
+csv = "1.2.0"
+serde = { version = "1.0.153", features = ["serde_derive"] }
