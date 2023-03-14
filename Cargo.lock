@@ -229,6 +229,8 @@ name = "coinbase_transactions"
 version = "0.1.0"
 dependencies = [
  "csv",
+ "csv_parser",
+ "models",
  "rand",
  "rust_decimal",
  "serde",
@@ -271,10 +273,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "csv_parser"
+version = "0.1.0"
+dependencies = [
+ "csv",
+ "models",
+ "serde",
+]
+
+[[package]]
 name = "csv_runner"
 version = "0.1.0"
 dependencies = [
  "coinbase_transactions",
+ "csv_parser",
 ]
 
 [[package]]
@@ -582,6 +594,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "models"
+version = "0.1.0"
+dependencies = [
+ "rust_decimal",
+ "serde",
+]
+
+[[package]]
 name = "num-traits"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -635,6 +655,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "coinbase_transactions",
+ "csv_parser",
  "kraken_ledgers",
  "serde",
  "tokio",
