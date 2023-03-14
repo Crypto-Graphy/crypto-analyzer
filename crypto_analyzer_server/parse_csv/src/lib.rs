@@ -1,6 +1,5 @@
-use coinbase_transactions::transaction_parser::{
-    self, is_transactions_csv, CoinbaseTransactionRecord,
-};
+use coinbase_transactions::transaction_parser::{CoinbaseTransactionRecord, CSV_HEADERS};
+use csv_parser::{Csv, CsvIdentifier, CsvParser};
 use kraken_ledgers::ledger_parser::{self, is_ledgers_csv, KrakenLedgerRecord};
 use serde::Serialize;
 
@@ -13,8 +12,10 @@ pub enum CsvType {
 }
 
 pub fn parse_csv(csv: String) -> CsvType {
-    if is_transactions_csv(&csv) {
-        let coinbase_transactions = transaction_parser::parse_csv_str(csv);
+    let coinbase_headers: Vec<&str> = CSV_HEADERS.into_iter().map(|header| *header).collect();
+
+    if Csv::is_valid_csv(&csv, coinbase_headers) {
+        let coinbase_transactions: Vec<CoinbaseTransactionRecord> = Csv::parse_csv(&csv);
         CsvType::CoinbaseTransactions(coinbase_transactions)
     } else if is_ledgers_csv(&csv) {
         let kraken_ledgers = ledger_parser::parse_csv_str(csv);

@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 coinbase_transactions = { path = "../coinbase_transactions" }
+csv_parser = { path = "../csv_parser" }
