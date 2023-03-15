@@ -20,25 +20,31 @@ pub mod coinbase {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
     pub struct CoinbaseTransactionRecord {
-        #[serde(rename = "Timestamp")]
+        #[serde(rename(serialize = "timeOfTransaction", deserialize = "Timestamp"))]
         pub time_of_transaction: String,
-        #[serde(rename = "Transaction Type")]
+        #[serde(rename(serialize = "transactionType", deserialize = "Transaction Type"))]
         pub transaction_type: String,
-        #[serde(rename = "Asset")]
+        #[serde(rename(serialize = "asset", deserialize = "Asset"))]
         pub asset: String,
-        #[serde(rename = "Quantity Transacted")]
+        #[serde(rename(serialize = "quantityTransacted", deserialize = "Quantity Transacted"))]
         pub quantity_transacted: Decimal,
-        #[serde(rename = "Spot Price Currency")]
+        #[serde(rename(serialize = "quantityTransacted", deserialize = "Spot Price Currency"))]
         pub spot_price_currency: String,
-        #[serde(rename = "Spot Price at Transaction")]
+        #[serde(rename(
+            serialize = "spotPriceAtTransaction",
+            deserialize = "Spot Price at Transaction"
+        ))]
         pub spot_price_at_transaction: Option<Decimal>,
-        #[serde(rename = "Subtotal")]
+        #[serde(rename(serialize = "subtotal", deserialize = "Subtotal"))]
         pub subtotal: Option<Decimal>,
-        #[serde(rename = "Total (inclusive of fees and/or spread)")]
+        #[serde(rename(
+            serialize = "total",
+            deserialize = "Total (inclusive of fees and/or spread)"
+        ))]
         pub total: Option<Decimal>,
-        #[serde(rename = "Fees and/or Spread")]
+        #[serde(rename(serialize = "fees", deserialize = "Fees and/or Spread"))]
         pub fees: Option<Decimal>,
-        #[serde(rename = "Notes")]
+        #[serde(rename(serialize = "notes", deserialize = "Notes"))]
         pub notes: String,
     }
 }
