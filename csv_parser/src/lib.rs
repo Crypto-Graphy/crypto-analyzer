@@ -35,9 +35,9 @@ impl CsvIdentifier for Csv {
             Err(_) => return false,
         };
 
-        return expected_csv_headers
+        expected_csv_headers
             .into_iter()
-            .all(|expected_header| header_row_headers.contains(&expected_header));
+            .all(|expected_header| header_row_headers.contains(&expected_header))
     }
 }
 
@@ -48,24 +48,14 @@ mod parse_csv_should {
     use self::rust_decimal::Decimal;
     use crate::{Csv, CsvIdentifier, CsvParser};
 
-    use models::{
-        coinbase::CSV_HEADERS as COINBASE_HEADERS,
-        kraken::{KrakenLedgerRecord, CSV_HEADERS as KRAKEN_HEADERS},
-    };
+    use models::{coinbase::CSV_HEADERS as COINBASE_HEADERS, kraken::KrakenLedgerRecord};
 
     #[test]
     fn return_true_when_valid_csv() {
         let csv = "Timestamp,Transaction Type,Asset,Quantity Transacted,Spot Price Currency,Spot Price at Transaction,Subtotal,Total (inclusive of fees and/or spread),Fees and/or Spread,Notes\n".to_string() 
         + "2021-01-22T21:38:01Z,Buy,BTC,0.0016458,USD,1617.57,97.01,2.66,2.99,Bought 0.0016458 BTC for $2.66 USD";
 
-        let valid_csv = Csv::is_valid_csv(
-            csv.as_str(),
-            COINBASE_HEADERS
-                .clone()
-                .into_iter()
-                .map(|header| *header)
-                .collect::<Vec<&str>>(),
-        );
+        let valid_csv = Csv::is_valid_csv(csv.as_str(), COINBASE_HEADERS.to_vec());
         assert!(valid_csv);
     }
 
@@ -73,25 +63,14 @@ mod parse_csv_should {
     fn return_false_when_empty() {
         let csv = "";
 
-        let valid_csv = Csv::is_valid_csv(
-            csv,
-            COINBASE_HEADERS
-                .clone()
-                .into_iter()
-                .map(|header| *header)
-                .collect::<Vec<&str>>(),
-        );
+        let valid_csv = Csv::is_valid_csv(csv, COINBASE_HEADERS.to_vec());
         assert!(!valid_csv);
     }
 
     #[test]
     fn return_false_when_contains_some_headers() {
         let csv = "Asset,Quantity Transacted\n".to_string() + "BTC,0.01";
-        let headers = COINBASE_HEADERS
-            .clone()
-            .into_iter()
-            .map(|header| *header)
-            .collect::<Vec<&str>>();
+        let headers = COINBASE_HEADERS.to_vec();
 
         let valid_csv = Csv::is_valid_csv(csv.as_str(), headers);
         assert!(!valid_csv);
@@ -130,7 +109,7 @@ mod is_valid_csv {
     use super::Csv;
 
     fn get_kraken_headers() -> Vec<&'static str> {
-        KRAKEN_HEADERS.into_iter().map(|header| *header).collect()
+        KRAKEN_HEADERS.to_vec()
     }
 
     #[test]

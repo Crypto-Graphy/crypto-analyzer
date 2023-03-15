@@ -5,10 +5,7 @@ pub mod ledger_parser {
     use std::collections::HashMap;
 
     extern crate models;
-
-    use self::csv::{Reader, ReaderBuilder};
     use self::rust_decimal::Decimal;
-    use self::serde::{Deserialize, Serialize};
 
     pub use self::models::kraken::{KrakenLedgerRecord, CSV_HEADERS};
 

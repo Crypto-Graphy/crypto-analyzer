@@ -12,8 +12,8 @@ pub enum CsvType {
 }
 
 pub fn parse_csv(csv: String) -> CsvType {
-    let coinbase_headers: Vec<&str> = CSV_HEADERS.into_iter().map(|header| *header).collect();
-    let kraken_headers: Vec<&str> = KRAKEN_HEADERS.into_iter().map(|header| *header).collect();
+    let coinbase_headers: Vec<&str> = CSV_HEADERS.to_vec();
+    let kraken_headers: Vec<&str> = KRAKEN_HEADERS.to_vec();
 
     if Csv::is_valid_csv(&csv, coinbase_headers) {
         let coinbase_transactions: Vec<CoinbaseTransactionRecord> = Csv::parse_csv(&csv);
