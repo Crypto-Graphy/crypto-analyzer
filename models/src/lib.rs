@@ -48,3 +48,32 @@ pub mod coinbase {
         pub notes: String,
     }
 }
+
+pub mod kraken {
+    use rust_decimal::Decimal;
+    use serde::{Deserialize, Serialize};
+
+    pub const CSV_HEADERS: &[&str] = &[
+        "txid", "refid", "time", "type", "subtype", "aclass", "asset", "amount", "fee", "balance",
+    ];
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+    #[serde(rename_all(serialize = "camelCase"))]
+    pub struct KrakenLedgerRecord {
+        pub txid: Option<String>,
+        pub refid: String,
+        pub time: String,
+        #[serde(rename(deserialize = "type"))]
+        pub record_type: String,
+        pub subtype: Option<String>,
+        #[serde(rename(deserialize = "aclass"))]
+        pub a_class: String,
+        pub asset: String,
+        #[serde(with = "rust_decimal::serde::str")]
+        pub amount: Decimal,
+        #[serde(with = "rust_decimal::serde::str")]
+        pub fee: Decimal,
+        #[serde(with = "rust_decimal::serde::str_option")]
+        pub balance: Option<Decimal>,
+    }
+}

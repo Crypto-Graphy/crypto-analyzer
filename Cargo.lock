@@ -278,6 +278,7 @@ version = "0.1.0"
 dependencies = [
  "csv",
  "models",
+ "rust_decimal",
  "serde",
 ]
 
@@ -532,6 +533,7 @@ name = "kraken_ledgers"
 version = "0.1.0"
 dependencies = [
  "csv",
+ "models",
  "rand",
  "rust_decimal",
  "serde",
