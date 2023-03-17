@@ -1,10 +1,10 @@
 [package]
-name = "csv_runner"
+name = "models"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-coinbase_transactions = { path = "../coinbase_transactions" }
-csv_parser = { path = "../csv_parser" }
+serde.workspace = true
+rust_decimal.workspace = true

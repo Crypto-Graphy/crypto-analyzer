@@ -1,27 +1,12 @@
 pub mod transaction_parser {
-    extern crate csv;
+    extern crate models;
     extern crate rust_decimal;
-    extern crate serde;
 
     use std::{collections::HashMap, str::FromStr};
 
-    use self::csv::ReaderBuilder;
-
+    pub use self::models::coinbase::CoinbaseTransactionRecord;
+    pub use self::models::coinbase::CSV_HEADERS;
     use self::rust_decimal::Decimal;
-    use self::serde::{Deserialize, Serialize};
-
-    pub const CSV_HEADERS: &[&str] = &[
-        "Timestamp",
-        "Transaction Type",
-        "Asset",
-        "Quantity Transacted",
-        "Spot Price Currency",
-        "Spot Price at Transaction",
-        "Subtotal",
-        "Total (inclusive of fees and/or spread)",
-        "Fees and/or Spread",
-        "Notes",
-    ];
 
     const INCLUDE_TRANSACTIONS: &[&str] = &[
         "Buy",
@@ -45,51 +30,6 @@ pub mod transaction_parser {
         "Advanced Trade Buy",
     ];
     const OUTPUT_TRANSACTIONS: &[&str] = &["Sell", "Send", "CardSpend"];
-
-    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
-    pub struct CoinbaseTransactionRecord {
-        #[serde(rename = "Timestamp")]
-        pub time_of_transaction: String,
-        #[serde(rename = "Transaction Type")]
-        pub transaction_type: String,
-        #[serde(rename = "Asset")]
-        pub asset: String,
-        #[serde(rename = "Quantity Transacted")]
-        pub quantity_transacted: Decimal,
-        #[serde(rename = "Spot Price Currency")]
-        pub spot_price_currency: String,
-        #[serde(rename = "Spot Price at Transaction")]
-        pub spot_price_at_transaction: Option<Decimal>,
-        #[serde(rename = "Subtotal")]
-        pub subtotal: Option<Decimal>,
-        #[serde(rename = "Total (inclusive of fees and/or spread)")]
-        pub total: Option<Decimal>,
-        #[serde(rename = "Fees and/or Spread")]
-        pub fees: Option<Decimal>,
-        #[serde(rename = "Notes")]
-        pub notes: String,
-    }
-
-    pub fn is_transactions_csv(csv: &str) -> bool {
-        let mut binding = ReaderBuilder::new().from_reader(csv.as_bytes());
-        let header_row_headers: Vec<&str> = match binding.headers() {
-            Ok(headers) => headers.into_iter().collect(),
-            Err(_) => return false,
-        };
-
-        return CSV_HEADERS
-            .iter()
-            .all(|csv_header| header_row_headers.contains(csv_header));
-    }
-
-    pub fn parse_csv_str(csv: String) -> Vec<CoinbaseTransactionRecord> {
-        ReaderBuilder::new()
-            .flexible(true)
-            .from_reader(csv.as_bytes())
-            .into_deserialize()
-            .flatten()
-            .collect()
-    }
 
     pub fn get_total_staking_rewards_map<'a>(
         transactions: impl Iterator<Item = &'a CoinbaseTransactionRecord>,
@@ -182,73 +122,21 @@ pub mod transaction_parser {
             .iter()
             .any(|send_transaction| send_transaction.eq(&transaction.transaction_type))
     }
-
-    #[cfg(test)]
-    mod is_transactions_csv_should {
-        use super::is_transactions_csv;
-
-        #[test]
-        fn return_true_when_valid_csv() {
-            let csv = "Timestamp,Transaction Type,Asset,Quantity Transacted,Spot Price Currency,Spot Price at Transaction,Subtotal,Total (inclusive of fees and/or spread),Fees and/or Spread,Notes\n".to_string() 
-        + "2021-01-22T21:38:01Z,Buy,BTC,0.0016458,USD,1617.57,97.01,2.66,2.99,Bought 0.0016458 BTC for $2.66 USD";
-
-            let valid_csv = is_transactions_csv(csv.as_str());
-            assert!(valid_csv);
-        }
-
-        #[test]
-        fn return_false_when_empty() {
-            let csv = "";
-
-            let valid_csv = is_transactions_csv(csv);
-            assert!(!valid_csv);
-        }
-
-        #[test]
-        fn return_false_when_contains_some_headers() {
-            let csv = "Asset,Quantity Transacted\n".to_string() + "BTC,0.01";
-
-            let valid_csv = is_transactions_csv(csv.as_str());
-            assert!(!valid_csv);
-        }
-    }
 }
 
 #[cfg(test)]
 mod test {
+    extern crate models;
     extern crate rand;
     extern crate rust_decimal;
 
     use self::rand::Rng;
 
-    use super::{
-        transaction_parser::{get_input_transactions, *},
-        *,
-    };
+    use self::models::coinbase::CoinbaseTransactionRecord;
+
+    use super::transaction_parser::*;
 
     use self::rust_decimal::Decimal;
-
-    #[test]
-    fn should_parse_csv_str() {
-        let sample_csv = "Timestamp,Transaction Type,Asset,Quantity Transacted,Spot Price Currency,Spot Price at Transaction,Subtotal,Total (inclusive of fees and/or spread),Fees and/or Spread,Notes\n".to_string() + 
-            "2021-04-01T21:38:01Z,Buy,BTC,0.0016458,USD,58943.98,97.01,100.00,2.99,Bought 0.0016458 BTC for $100.00 USD";
-        let expected = CoinbaseTransactionRecord {
-            time_of_transaction: "2021-04-01T21:38:01Z".to_string(),
-            transaction_type: "Buy".to_string(),
-            asset: "BTC".to_string(),
-            quantity_transacted: Decimal::new(16458, 7),
-            spot_price_currency: "USD".to_string(),
-            spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-            subtotal: Some(Decimal::new(9701, 2)),
-            total: Some(Decimal::new(100, 0)),
-            fees: Some(Decimal::new(299, 2)),
-            notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-        };
-
-        let result = parse_csv_str(sample_csv);
-
-        assert_eq!((*result.first().unwrap()), expected);
-    }
 
     #[test]
     fn should_get_total_staking_rewards_returns_with_multiple_asset_types() {
@@ -340,7 +228,7 @@ mod test {
 
     #[test]
     fn get_total_staking_rewards_when_given_empty_vec() {
-        let sample_vec: Vec<transaction_parser::CoinbaseTransactionRecord> = Vec::new();
+        let sample_vec: Vec<CoinbaseTransactionRecord> = Vec::new();
         let actual = get_total_staking_rewards_map(sample_vec.iter());
 
         assert!(actual.is_empty());
@@ -422,10 +310,12 @@ mod test {
 
 #[cfg(test)]
 mod book_of_record {
+    extern crate models;
     extern crate rust_decimal;
 
-    use super::transaction_parser::{get_book_of_record, CoinbaseTransactionRecord};
+    use super::transaction_parser::get_book_of_record;
 
+    use self::models::coinbase::CoinbaseTransactionRecord;
     use self::rust_decimal::{prelude::Zero, Decimal};
 
     #[test]

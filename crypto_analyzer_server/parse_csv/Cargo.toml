@@ -11,3 +11,4 @@ tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
 coinbase_transactions = { path = "../../coinbase_transactions" }
 kraken_ledgers = { path = "../../kraken_ledgers" }
 serde.workspace = true
+csv_parser = { path = "../../csv_parser" }

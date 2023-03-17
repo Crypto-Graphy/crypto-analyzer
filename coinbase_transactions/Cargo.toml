@@ -8,6 +8,8 @@ csv.workspace = true
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rust_decimal.workspace = true
+csv_parser = { path = "../csv_parser" }
+models = { path = "../models" }
 
 [dev-dependencies]
 rand = "*"
