@@ -4,6 +4,7 @@ members = [
     "kraken_ledgers",
     "coin_gecko",
     "crypto_analyzer_server",
+    "crypto_analyzer_egui",
     "csv_runner",
     "csv_parser",
     "models",

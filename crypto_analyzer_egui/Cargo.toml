@@ -1,0 +1,13 @@
+[package]
+name = "crypto_analyzer_egui"
+version = "0.1.0"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+egui = { version = "0.21.0", features = ["tracing"] }
+eframe = "0.21.3"
+tracing-subscriber = "0.3.16"
+coinbase_transactions = { path = "../coinbase_transactions" }
+csv_parser = { path = "../csv_parser" }
+im = "15.1.0"
