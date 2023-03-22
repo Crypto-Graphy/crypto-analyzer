@@ -5,7 +5,13 @@ use coinbase_transactions::transaction_parser::CoinbaseTransactionRecord;
 use csv_parser::CsvParser;
 use csv_parser::{self, Csv};
 use eframe::egui;
+use egui::Ui;
 use im;
+
+pub trait CryptoGraphyUi {
+    fn create_grid_filters(&self, ui: &mut Ui);
+    fn create_grid(&self, ui: &mut Ui);
+}
 
 fn main() -> Result<(), eframe::Error> {
     // Log to stdout (if you run with `RUST_LOG=debug`).
@@ -26,7 +32,7 @@ struct CryptoGraphy {
     file_path: String,
     coinbase_data: Arc<Mutex<im::Vector<CoinbaseTransactionRecord>>>,
     page: usize,
-    rows: usize,
+    rows: String,
 }
 
 impl Default for CryptoGraphy {
@@ -35,14 +41,24 @@ impl Default for CryptoGraphy {
             file_path: String::new(),
             coinbase_data: Arc::new(Mutex::new(im::Vector::default())),
             page: usize::default(),
-            rows: 5usize,
+            rows: "5".to_string(),
         }
+    }
+}
+
+impl CryptoGraphyUi for CryptoGraphy {
+    fn create_grid_filters(&self, ui: &mut Ui) {
+        todo!()
+    }
+
+    fn create_grid(&self, ui: &mut Ui) {
+        todo!()
     }
 }
 
 impl eframe::App for CryptoGraphy {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ctx, |ui: &mut Ui| {
             ui.heading("Crypto Analyzer");
             ui.horizontal(|ui| {
                 let label = ui.label("Select a csv file: ");
@@ -61,6 +77,10 @@ impl eframe::App for CryptoGraphy {
                 };
             }
 
+            let rows_label = ui.label("Rows: ");
+            ui.text_edit_singleline(&mut self.rows)
+                .labelled_by(rows_label.id);
+
             if self
                 .coinbase_data
                 .lock()
@@ -69,6 +89,13 @@ impl eframe::App for CryptoGraphy {
                 > 0usize
             {
                 let _grid = egui::Grid::new("coinbase_data_table").show(ui, |ui| {
+                    let rows: usize = match str::parse(&self.rows) {
+                        Ok(rows) => rows,
+                        Err(_) => {
+                            ui.label("Invalid rows amount");
+                            return ();
+                        }
+                    };
                     let transaction_type_label = ui.label("Transaction Type");
                     let currency_label = ui.label("Currency");
                     let amount_label = ui.label("Amount");
@@ -79,11 +106,11 @@ impl eframe::App for CryptoGraphy {
                         .lock()
                         .expect("Failed to get lock on coinbase_data");
 
-                    let current_display = self.rows * self.page;
+                    let current_display = rows * self.page;
                     let mut display_data = Vec::new();
 
                     // let data_iter = data.iter().skip(current_display);
-                    for i in current_display..(current_display + self.rows) {
+                    for i in current_display..(current_display + rows) {
                         display_data.push(data.get(i));
                     }
 
@@ -102,15 +129,20 @@ impl eframe::App for CryptoGraphy {
                     });
 
                     ui.horizontal(|ui| {
+                        let total_pages = calculate_total_pages(data.len(), rows);
                         if ui.button("Previous").clicked() {
-                            self.page = self.page - 1;
+                            if self.page != 0usize {
+                                self.page = self.page - 1;
+                            }
                         };
                         ui.label("Page");
                         ui.label((self.page + 1).to_string());
                         ui.label("/");
-                        ui.label(calculate_total_pages(data.len(), self.rows).to_string());
+                        ui.label(total_pages.to_string());
                         if ui.button("Next").clicked() {
-                            self.page = self.page + 1;
+                            if self.page != total_pages {
+                                self.page = self.page + 1;
+                            }
                         };
                     });
                 });
