@@ -1,6 +1,3 @@
-extern crate rust_decimal;
-extern crate serde;
-
 pub mod coinbase {
     use rust_decimal::Decimal;
     use serde::{Deserialize, Serialize};

@@ -7,9 +7,12 @@ members = [
     "csv_runner",
     "csv_parser",
     "models",
+    "crypto_database",
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace.package]
+version = "0.1.0"
 
 [workspace.dependencies]
 rust_decimal = { version = "1.28.1", features = ["serde", "serde-with-str"] }
