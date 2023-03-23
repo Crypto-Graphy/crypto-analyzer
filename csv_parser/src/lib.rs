@@ -132,7 +132,7 @@ mod is_valid_csv {
     fn return_false_when_empty() {
         let csv = "";
 
-        let valid_csv = Csv::is_valid_csv(&csv, get_kraken_headers());
+        let valid_csv = Csv::is_valid_csv(csv, get_kraken_headers());
         assert!(!valid_csv);
     }
 

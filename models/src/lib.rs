@@ -1,5 +1,5 @@
-use chrono::{DateTime, TimeZone, Utc};
-use serde::{Deserialize, Deserializer};
+
+
 
 pub mod coinbase {
     pub use chrono::{DateTime, Utc};
@@ -51,7 +51,7 @@ pub mod coinbase {
 }
 
 pub mod kraken {
-    pub const DATE_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S";
+    pub const DATE_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
     use chrono::TimeZone;
     pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
