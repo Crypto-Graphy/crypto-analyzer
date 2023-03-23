@@ -12,3 +12,4 @@ serde.workspace = true
 [dev-dependencies]
 models = { path = "../models" }
 rust_decimal.workspace = true
+chrono.workspace = true

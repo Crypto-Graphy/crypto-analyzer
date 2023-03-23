@@ -43,12 +43,17 @@ impl CsvIdentifier for Csv {
 
 #[cfg(test)]
 mod parse_csv_should {
+    extern crate chrono;
     extern crate models;
     extern crate rust_decimal;
+
+    use self::chrono::prelude::*;
     use self::rust_decimal::Decimal;
     use crate::{Csv, CsvIdentifier, CsvParser};
-
-    use models::{coinbase::CSV_HEADERS as COINBASE_HEADERS, kraken::KrakenLedgerRecord};
+    use models::{
+        coinbase::CSV_HEADERS as COINBASE_HEADERS,
+        kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
+    };
 
     #[test]
     fn return_true_when_valid_csv() {
@@ -85,7 +90,9 @@ mod parse_csv_should {
         let expected_ledger = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "deposit".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -125,7 +132,7 @@ mod is_valid_csv {
     fn return_false_when_empty() {
         let csv = "";
 
-        let valid_csv = Csv::is_valid_csv(&csv, get_kraken_headers());
+        let valid_csv = Csv::is_valid_csv(csv, get_kraken_headers());
         assert!(!valid_csv);
     }
 
