@@ -7,7 +7,7 @@ pub mod ledger_parser {
     extern crate models;
     use self::rust_decimal::Decimal;
 
-    pub use self::models::kraken::{KrakenLedgerRecord, CSV_HEADERS};
+    pub use self::models::kraken::{KrakenLedgerRecord, CSV_HEADERS, DATE_FORMAT};
 
     pub fn get_total_staking_rewards_map<'a, I>(records: I) -> HashMap<String, Decimal>
     where
@@ -61,18 +61,24 @@ pub mod ledger_parser {
 
 #[cfg(test)]
 mod test {
+    extern crate chrono;
     extern crate rust_decimal;
 
     use self::rust_decimal::{prelude::Zero, Decimal};
 
-    use super::ledger_parser::{get_total_staking_rewards_map, KrakenLedgerRecord};
+    use self::chrono::prelude::*;
+    use super::ledger_parser::{
+        get_total_staking_rewards_map, KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT,
+    };
 
     #[test]
     fn should_get_staking_rewards_for_multiple() {
         let sample_ledger_1 = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -85,7 +91,9 @@ mod test {
         let sample_ledger_2 = KrakenLedgerRecord {
             txid: Some("899OJA-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -119,7 +127,9 @@ mod test {
         let sample_ledger_1 = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -132,7 +142,9 @@ mod test {
         let sample_ledger_2 = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -161,9 +173,13 @@ mod test {
 
 #[cfg(test)]
 mod book_of_record {
+    extern crate chrono;
     extern crate rust_decimal;
-    use super::ledger_parser::{get_book_of_record, KrakenLedgerRecord};
+    use super::ledger_parser::{
+        get_book_of_record, KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT,
+    };
 
+    use self::chrono::prelude::*;
     use self::rust_decimal::{prelude::Zero, Decimal};
 
     #[test]
@@ -171,7 +187,9 @@ mod book_of_record {
         let sample_ledger_1 = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -184,7 +202,9 @@ mod book_of_record {
         let sample_ledger_2 = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -208,7 +228,9 @@ mod book_of_record {
         let sample_ledger_1 = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
@@ -221,7 +243,9 @@ mod book_of_record {
         let sample_ledger_2 = KrakenLedgerRecord {
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: "2021-09-29 15:18:30".to_string(),
+            time: Utc
+                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                .unwrap(),
             record_type: "staking".to_string(),
             subtype: None,
             a_class: "currency".to_string(),
