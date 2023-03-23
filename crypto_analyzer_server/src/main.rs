@@ -1,6 +1,3 @@
-extern crate axum;
-extern crate tokio;
-
 use axum::{
     http::StatusCode,
     routing::{get, post},
@@ -61,13 +58,14 @@ mod parse_csver_should {
     use std::{str::FromStr, vec};
 
     use coinbase_transactions::transaction_parser::CoinbaseTransactionRecord;
-    use kraken_ledgers::ledger_parser::KrakenLedgerRecord;
+    use kraken_ledgers::ledger_parser::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT};
 
     use axum::{http::StatusCode, Json};
     use parse_csv::CsvType;
     use rust_decimal::Decimal;
 
     use super::parse_csver;
+    use chrono::prelude::*;
 
     #[actix_rt::test]
     async fn parse_coinbase_transaction() {
@@ -77,7 +75,7 @@ mod parse_csver_should {
 
         let expected_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-01-22T21:38:01Z".to_string(),
+                time_of_transaction: "2021-01-22T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "BTC".to_string(),
                 quantity_transacted: Decimal::from_str("0.0016458").unwrap(),
@@ -89,7 +87,7 @@ mod parse_csver_should {
                 notes: "Bought 0.0016458 BTC for $2.66 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2022-01-22T21:39:01Z".to_string(),
+                time_of_transaction: "2022-01-22T21:39:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Sell".to_string(),
                 asset: "BTC".to_string(),
                 quantity_transacted: Decimal::from_str("0.0016458").unwrap(),
@@ -130,7 +128,9 @@ mod parse_csver_should {
             KrakenLedgerRecord {
                 txid: Some("QWERTY-FOGWB-JOTO7J".to_string()),
                 refid: "QWERTY-ILZGGG-LCBLBL".to_string(),
-                time: "2021-07-29 1:19:30".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-07-29 1:19:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
                 record_type: "Buy".to_string(),
                 subtype: None,
                 a_class: "currency".to_string(),
@@ -142,7 +142,9 @@ mod parse_csver_should {
             KrakenLedgerRecord {
                 txid: Some("YTREWQ-FOGWB-JOTO7J".to_string()),
                 refid: "YTREWQ-ILZGGG-LCBLBL".to_string(),
-                time: "2022-07-29 1:19:30".to_string(),
+                time: Utc
+                    .datetime_from_str("2022-07-29 1:19:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
                 record_type: "Sell".to_string(),
                 subtype: None,
                 a_class: "currency".to_string(),

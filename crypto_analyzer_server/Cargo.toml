@@ -10,6 +10,7 @@ axum = "0.6.10"
 tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
 parse_csv = { path = "./parse_csv" }
 serde.workspace = true
+chrono.workspace = true
 
 [dev-dependencies]
 coinbase_transactions = { path = "../coinbase_transactions" } # Used in unit testing
