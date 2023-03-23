@@ -126,6 +126,7 @@ pub mod transaction_parser {
 
 #[cfg(test)]
 mod test {
+    extern crate chrono;
     extern crate models;
     extern crate rand;
     extern crate rust_decimal;
@@ -138,11 +139,13 @@ mod test {
 
     use self::rust_decimal::Decimal;
 
+    use self::chrono::prelude::*;
+
     #[test]
     fn should_get_total_staking_rewards_returns_with_multiple_asset_types() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:01Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(22028, 6),
@@ -154,7 +157,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "ALGO".to_string(),
                 quantity_transacted: Decimal::new(16458, 7),
@@ -195,7 +198,7 @@ mod test {
 
         let sample_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:01Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: given_transaction_1,
@@ -207,7 +210,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: given_transaction_2,
@@ -238,7 +241,7 @@ mod test {
     fn should_return_input_transactions_with_expected_content() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(2200024, 5),
@@ -250,7 +253,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Receive".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(2200024, 5),
@@ -275,7 +278,7 @@ mod test {
     fn should_filter_out_non_input_transactions() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(2200024, 5),
@@ -287,7 +290,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Send".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(2200024, 5),
@@ -310,6 +313,7 @@ mod test {
 
 #[cfg(test)]
 mod book_of_record {
+    extern crate chrono;
     extern crate models;
     extern crate rust_decimal;
 
@@ -318,11 +322,13 @@ mod book_of_record {
     use self::models::coinbase::CoinbaseTransactionRecord;
     use self::rust_decimal::{prelude::Zero, Decimal};
 
+    use self::chrono::prelude::*;
+
     #[test]
     fn performs_addition_and_subtraction() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(2200024, 5),
@@ -334,7 +340,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 DOT for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-04T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-04T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(602, 2),
@@ -346,7 +352,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 DOT for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-05T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-05T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Sell".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(3027, 3),
@@ -371,7 +377,7 @@ mod book_of_record {
     fn stores_multiple_assets() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
                 quantity_transacted: Decimal::new(2200024, 5),
@@ -383,7 +389,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 DOT for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "BTC".to_string(),
                 quantity_transacted: Decimal::new(1802442, 5),
@@ -428,7 +434,7 @@ mod book_of_record {
     fn convert_asset() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "BTC".to_string(),
                 quantity_transacted: Decimal::new(1802442, 5),
@@ -440,7 +446,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 BTC for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".to_string(),
+                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Convert".to_string(),
                 asset: "BTC".to_string(),
                 quantity_transacted: Decimal::new(1802442, 5),

@@ -1,7 +1,8 @@
-extern crate rust_decimal;
-extern crate serde;
+use chrono::{DateTime, TimeZone, Utc};
+use serde::{Deserialize, Deserializer};
 
 pub mod coinbase {
+    pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
     use serde::{Deserialize, Serialize};
 
@@ -21,7 +22,7 @@ pub mod coinbase {
     #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
     pub struct CoinbaseTransactionRecord {
         #[serde(rename(serialize = "timeOfTransaction", deserialize = "Timestamp"))]
-        pub time_of_transaction: String,
+        pub time_of_transaction: DateTime<Utc>,
         #[serde(rename(serialize = "transactionType", deserialize = "Transaction Type"))]
         pub transaction_type: String,
         #[serde(rename(serialize = "asset", deserialize = "Asset"))]
@@ -50,8 +51,11 @@ pub mod coinbase {
 }
 
 pub mod kraken {
+    pub const DATE_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S";
+    use chrono::TimeZone;
+    pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
-    use serde::{Deserialize, Serialize};
+    use serde::{Deserialize, Deserializer, Serialize};
 
     pub const CSV_HEADERS: &[&str] = &[
         "txid", "refid", "time", "type", "subtype", "aclass", "asset", "amount", "fee", "balance",
@@ -62,7 +66,8 @@ pub mod kraken {
     pub struct KrakenLedgerRecord {
         pub txid: Option<String>,
         pub refid: String,
-        pub time: String,
+        #[serde(deserialize_with = "parse_date_time")]
+        pub time: DateTime<Utc>,
         #[serde(rename(deserialize = "type"))]
         pub record_type: String,
         pub subtype: Option<String>,
@@ -75,5 +80,13 @@ pub mod kraken {
         pub fee: Decimal,
         #[serde(with = "rust_decimal::serde::str_option")]
         pub balance: Option<Decimal>,
+    }
+
+    fn parse_date_time<'de, D: Deserializer<'de>>(d: D) -> Result<DateTime<Utc>, D::Error> {
+        // 2021-09-29 15:18:30
+        let s: Option<String> = Deserialize::deserialize(d)?;
+
+        Utc.datetime_from_str(&s.unwrap(), DATE_FORMAT)
+            .map_err(serde::de::Error::custom)
     }
 }
