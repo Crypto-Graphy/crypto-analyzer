@@ -1,6 +1,3 @@
-
-
-
 pub mod coinbase {
     pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
