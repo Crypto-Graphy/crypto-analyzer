@@ -75,6 +75,7 @@ mod parse_csver_should {
 
         let expected_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-01-22T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "BTC".to_string(),
@@ -87,6 +88,7 @@ mod parse_csver_should {
                 notes: "Bought 0.0016458 BTC for $2.66 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2022-01-22T21:39:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Sell".to_string(),
                 asset: "BTC".to_string(),
@@ -126,6 +128,7 @@ mod parse_csver_should {
 
         let expected_vec = vec![
             KrakenLedgerRecord {
+                id: None,
                 txid: Some("QWERTY-FOGWB-JOTO7J".to_string()),
                 refid: "QWERTY-ILZGGG-LCBLBL".to_string(),
                 time: Utc
@@ -140,6 +143,7 @@ mod parse_csver_should {
                 balance: Some(Decimal::from_str("5.00000000").unwrap()),
             },
             KrakenLedgerRecord {
+                id: None,
                 txid: Some("YTREWQ-FOGWB-JOTO7J".to_string()),
                 refid: "YTREWQ-ILZGGG-LCBLBL".to_string(),
                 time: Utc

@@ -94,7 +94,6 @@ pub mod kraken {
     }
 
     fn parse_date_time<'de, D: Deserializer<'de>>(d: D) -> Result<DateTime<Utc>, D::Error> {
-        // 2021-09-29 15:18:30
         let s: Option<String> = Deserialize::deserialize(d)?;
 
         Utc.datetime_from_str(&s.unwrap(), DATE_FORMAT)

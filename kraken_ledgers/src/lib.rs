@@ -74,6 +74,7 @@ mod test {
     #[test]
     fn should_get_staking_rewards_for_multiple() {
         let sample_ledger_1 = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
@@ -89,6 +90,7 @@ mod test {
         };
 
         let sample_ledger_2 = KrakenLedgerRecord {
+            id: None,
             txid: Some("899OJA-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
@@ -125,6 +127,7 @@ mod test {
     #[test]
     fn should_sum_rewards_of_the_same_currency() {
         let sample_ledger_1 = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
@@ -140,6 +143,7 @@ mod test {
         };
 
         let sample_ledger_2 = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
@@ -185,6 +189,7 @@ mod book_of_record {
     #[test]
     fn should_sum_multiple_book() {
         let sample_ledger_1 = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
@@ -200,6 +205,7 @@ mod book_of_record {
         };
 
         let sample_ledger_2 = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
@@ -226,6 +232,7 @@ mod book_of_record {
     #[test]
     fn should_subtract_negative_values_book() {
         let sample_ledger_1 = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
@@ -241,6 +248,7 @@ mod book_of_record {
         };
 
         let sample_ledger_2 = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc

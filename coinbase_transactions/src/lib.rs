@@ -145,6 +145,7 @@ mod test {
     fn should_get_total_staking_rewards_returns_with_multiple_asset_types() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "DOT".to_string(),
@@ -157,6 +158,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "ALGO".to_string(),
@@ -198,6 +200,7 @@ mod test {
 
         let sample_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "DOT".to_string(),
@@ -210,6 +213,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Rewards Income".to_string(),
                 asset: "DOT".to_string(),
@@ -241,6 +245,7 @@ mod test {
     fn should_return_input_transactions_with_expected_content() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
@@ -253,6 +258,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Receive".to_string(),
                 asset: "DOT".to_string(),
@@ -278,6 +284,7 @@ mod test {
     fn should_filter_out_non_input_transactions() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
@@ -290,6 +297,7 @@ mod test {
                 notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Send".to_string(),
                 asset: "DOT".to_string(),
@@ -328,6 +336,7 @@ mod book_of_record {
     fn performs_addition_and_subtraction() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
@@ -340,6 +349,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 DOT for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-04T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
@@ -352,6 +362,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 DOT for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-05T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Sell".to_string(),
                 asset: "DOT".to_string(),
@@ -377,6 +388,7 @@ mod book_of_record {
     fn stores_multiple_assets() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "DOT".to_string(),
@@ -389,6 +401,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 DOT for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "BTC".to_string(),
@@ -434,6 +447,7 @@ mod book_of_record {
     fn convert_asset() {
         let sample_vec = vec![
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Buy".to_string(),
                 asset: "BTC".to_string(),
@@ -446,6 +460,7 @@ mod book_of_record {
                 notes: "Bought 22.00024 BTC for $122.00 USD".to_string(),
             },
             CoinbaseTransactionRecord {
+                id: None,
                 time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
                 transaction_type: "Convert".to_string(),
                 asset: "BTC".to_string(),

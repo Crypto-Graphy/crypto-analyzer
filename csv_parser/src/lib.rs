@@ -88,6 +88,7 @@ mod parse_csv_should {
                 + "L7RLII-OFGWB-JTUO7J,RKB7ODD-ILZGC5-LCRRBL,2021-09-29 15:18:30,deposit,,currency,ADA,5.00000000,0.00000000,5.00000000";
 
         let expected_ledger = KrakenLedgerRecord {
+            id: None,
             txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
             refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
             time: Utc
