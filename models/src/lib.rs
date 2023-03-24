@@ -18,6 +18,7 @@ pub mod coinbase {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
     pub struct CoinbaseTransactionRecord {
+        pub id: Option<i32>,
         #[serde(rename(serialize = "timeOfTransaction", deserialize = "Timestamp"))]
         pub time_of_transaction: DateTime<Utc>,
         #[serde(rename(serialize = "transactionType", deserialize = "Transaction Type"))]
@@ -45,6 +46,12 @@ pub mod coinbase {
         #[serde(rename(serialize = "notes", deserialize = "Notes"))]
         pub notes: String,
     }
+
+    impl std::fmt::Display for CoinbaseTransactionRecord {
+        fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(formatter, "{}", format!("{:?}", self))
+        }
+    }
 }
 
 pub mod kraken {
@@ -61,6 +68,7 @@ pub mod kraken {
     #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
     #[serde(rename_all(serialize = "camelCase"))]
     pub struct KrakenLedgerRecord {
+        pub id: Option<i32>,
         pub txid: Option<String>,
         pub refid: String,
         #[serde(deserialize_with = "parse_date_time")]
@@ -77,6 +85,12 @@ pub mod kraken {
         pub fee: Decimal,
         #[serde(with = "rust_decimal::serde::str_option")]
         pub balance: Option<Decimal>,
+    }
+
+    impl std::fmt::Display for KrakenLedgerRecord {
+        fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(formatter, "{}", format!("{:?}", self))
+        }
     }
 
     fn parse_date_time<'de, D: Deserializer<'de>>(d: D) -> Result<DateTime<Utc>, D::Error> {
