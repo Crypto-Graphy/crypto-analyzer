@@ -15,7 +15,11 @@ members = [
 version = "0.1.0"
 
 [workspace.dependencies]
-rust_decimal = { version = "1.28.1", features = ["serde", "serde-with-str"] }
+rust_decimal = { version = "1.28.1", features = [
+    "serde",
+    "serde-with-str",
+    "db-diesel2-postgres",
+] }
 csv = "1.2.0"
 serde = { version = "1.0.153", features = ["serde_derive"] }
 chrono = { version = "0.4.24", features = ["serde"] }
