@@ -4,6 +4,7 @@ use axum::{
     Json, Router,
 };
 use core::panic;
+use crypto_database::models::{CoinbaseTransaction, NewCoinbaseTransaction};
 use parse_csv::{parse_csv, CsvType};
 use std::{env, net::SocketAddr, str::FromStr};
 
@@ -20,6 +21,14 @@ async fn main() {
         .route(
             format!("/api/{}/parse-csv", API_VERSION).as_str(),
             post(parse_csver),
+        )
+        .route(
+            format!("/api/{}/coinbase-transaction/", API_VERSION).as_str(),
+            get(|| async { "placeholder" }),
+        )
+        .route(
+            format!("/api/{}/coinbase-transaction/", API_VERSION).as_str(),
+            post(insert_coinbase_transaction),
         );
 
     axum::Server::bind(&get_socket_address())
@@ -49,6 +58,16 @@ async fn parse_csver(payload: String) -> (StatusCode, Json<CsvType>) {
         }
         CsvType::KrakenLedgers(value) => (StatusCode::OK, Json(CsvType::KrakenLedgers(value))),
         CsvType::NotRecognized(e) => (StatusCode::BAD_REQUEST, Json(CsvType::NotRecognized(e))),
+    }
+}
+
+async fn insert_coinbase_transaction(
+    payload: NewCoinbaseTransaction,
+) -> (StatusCode, Json<CoinbaseTransaction>) {
+    let mut connection = crypto_database::establish_connection();
+    match crypto_database::insert_coinbase_transaction(payload, &mut connection) {
+        Ok(coinbase_transaction) => (StatusCode::OK, Json(coinbase_transaction)),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR,),
     }
 }
 

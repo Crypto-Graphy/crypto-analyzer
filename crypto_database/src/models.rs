@@ -2,8 +2,9 @@ use crate::schema::coinbase_transactions;
 use chrono::prelude::*;
 use diesel::prelude::*;
 use rust_decimal::Decimal;
+use serde::{Deserialize, Serialize};
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct CoinbaseTransaction {
     pub id: i32,
     pub time_of_transaction: DateTime<Utc>,
@@ -18,7 +19,7 @@ pub struct CoinbaseTransaction {
     pub notes: String,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize)]
 #[diesel(table_name = coinbase_transactions)]
 pub struct NewCoinbaseTransaction {
     pub time_of_transaction: DateTime<Utc>,

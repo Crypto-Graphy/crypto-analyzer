@@ -9,8 +9,10 @@ edition = "2021"
 axum = "0.6.10"
 tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
 parse_csv = { path = "./parse_csv" }
+coinbase_actions = { path = "./coinbase_actions" }
 serde.workspace = true
 chrono.workspace = true
+crypto_database = { path = "../crypto_database" }
 
 [dev-dependencies]
 coinbase_transactions = { path = "../coinbase_transactions" } # Used in unit testing

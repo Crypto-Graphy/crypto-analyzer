@@ -281,6 +281,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "coinbase_actions"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "coinbase_transactions"
 version = "0.1.0"
 dependencies = [
@@ -307,7 +314,9 @@ dependencies = [
  "actix-rt",
  "axum",
  "chrono",
+ "coinbase_actions",
  "coinbase_transactions",
+ "crypto_database",
  "kraken_ledgers",
  "parse_csv",
  "rust_decimal",
@@ -324,6 +333,7 @@ dependencies = [
  "dotenvy",
  "models",
  "rust_decimal",
+ "serde",
 ]
 
 [[package]]
