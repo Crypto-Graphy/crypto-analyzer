@@ -1,11 +1,12 @@
 use axum::{
+    extract::{Path, Query},
     http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
-use core::panic;
-use crypto_database::models::{CoinbaseTransaction, NewCoinbaseTransaction};
+use crypto_database::models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination};
 use parse_csv::{parse_csv, CsvType};
+use server_response::ServerResponse;
 use std::{env, net::SocketAddr, str::FromStr};
 
 const API_VERSION: &str = "v1";
@@ -23,11 +24,15 @@ async fn main() {
             post(parse_csver),
         )
         .route(
-            format!("/api/{}/coinbase-transaction/", API_VERSION).as_str(),
-            get(|| async { "placeholder" }),
+            format!("/api/{}/coinbase-transaction/:id", API_VERSION).as_str(),
+            get(get_coinbase_transaction),
         )
         .route(
-            format!("/api/{}/coinbase-transaction/", API_VERSION).as_str(),
+            format!("/api/{}/coinbase-transaction", API_VERSION).as_str(),
+            get(get_coinbase_transactions),
+        )
+        .route(
+            format!("/api/{}/coinbase-transaction", API_VERSION).as_str(),
             post(insert_coinbase_transaction),
         );
 
@@ -61,14 +66,33 @@ async fn parse_csver(payload: String) -> (StatusCode, Json<CsvType>) {
     }
 }
 
+async fn get_coinbase_transaction(
+    id: Path<i32>,
+) -> (StatusCode, Json<ServerResponse<CoinbaseTransaction>>) {
+    let server_response = coinbase_actions::get_coinbase_transaction(id.0);
+
+    (StatusCode::OK, Json(server_response))
+}
+
+async fn get_coinbase_transactions(
+    pagination: Query<Pagination>,
+) -> (StatusCode, Json<ServerResponse<Vec<CoinbaseTransaction>>>) {
+    let server_response = coinbase_actions::get_coinbase_transactions(pagination.0);
+
+    (StatusCode::OK, Json(server_response))
+}
+
 async fn insert_coinbase_transaction(
-    payload: NewCoinbaseTransaction,
-) -> (StatusCode, Json<CoinbaseTransaction>) {
-    let mut connection = crypto_database::establish_connection();
-    match crypto_database::insert_coinbase_transaction(payload, &mut connection) {
-        Ok(coinbase_transaction) => (StatusCode::OK, Json(coinbase_transaction)),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR,),
-    }
+    payload: Json<NewCoinbaseTransaction>,
+) -> (StatusCode, Json<ServerResponse<CoinbaseTransaction>>) {
+    let coinbase_transaction = coinbase_actions::insert_coinbase_transaction(payload.0);
+
+    let status_code = match &coinbase_transaction.success {
+        true => StatusCode::CREATED,
+        false => StatusCode::INTERNAL_SERVER_ERROR,
+    };
+
+    (status_code, Json(coinbase_transaction))
 }
 
 #[cfg(test)]

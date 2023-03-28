@@ -2,7 +2,7 @@ pub mod models;
 mod schema;
 
 use self::models::*;
-use crate::schema::coinbase_transactions::{self, dsl::*};
+use crate::schema::coinbase_transactions::dsl::coinbase_transactions;
 use diesel::{prelude::*, result::Error};
 use dotenvy::{self, dotenv};
 
@@ -16,29 +16,41 @@ pub fn establish_connection() -> PgConnection {
 
 pub fn insert_coinbase_transaction(
     new_coinbase_transaction: NewCoinbaseTransaction,
-    conn: &mut PgConnection,
+    connection: &mut PgConnection,
 ) -> Result<CoinbaseTransaction, Error> {
     diesel::insert_into(coinbase_transactions)
         .values(&new_coinbase_transaction)
-        .get_result::<CoinbaseTransaction>(conn)
+        .get_result::<CoinbaseTransaction>(connection)
+}
+
+pub fn bulk_insert_coinbase_transaction(
+    new_coinbase_transactions: Vec<NewCoinbaseTransaction>,
+    connection: &mut PgConnection,
+) -> Result<Vec<CoinbaseTransaction>, Error> {
+    diesel::insert_into(coinbase_transactions)
+        .values(&new_coinbase_transactions)
+        .get_results::<CoinbaseTransaction>(connection)
 }
 
 pub fn get_coinbase_transactions(
-    conn: &mut PgConnection,
+    pagination: &Pagination,
+    connection: &mut PgConnection,
 ) -> Result<Vec<CoinbaseTransaction>, Error> {
     coinbase_transactions
-        .limit(10i64)
-        .load::<CoinbaseTransaction>(conn)
+        .offset(pagination.items_per_page * pagination.page)
+        .limit(pagination.items_per_page)
+        .load::<CoinbaseTransaction>(connection)
 }
 
 pub fn get_coinbase_transaction(
-    id: coinbase_transactions::columns::id,
-    conn: &mut PgConnection,
+    id: i32,
+    connection: &mut PgConnection,
 ) -> Result<Vec<CoinbaseTransaction>, Error> {
     coinbase_transactions
         .find(id)
-        .load::<CoinbaseTransaction>(conn)
+        .load::<CoinbaseTransaction>(connection)
 }
+
 // #[cfg(test)]
 // mod tests {
 //     use super::*;
