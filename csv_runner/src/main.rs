@@ -8,7 +8,7 @@ fn main() {
     let data = std::fs::read_to_string("./data/very-large-dataset.csv").unwrap();
     let start = SystemTime::now();
     let data: Vec<CoinbaseTransactionRecord> = Csv::parse_csv(&data);
-    let data = data.into_iter().map(|ctr| NewCoinbaseTransaction {
+    let _data = data.into_iter().map(|ctr| NewCoinbaseTransaction {
         time_of_transaction: ctr.time_of_transaction,
         transaction_type: ctr.transaction_type,
         asset: ctr.asset,
