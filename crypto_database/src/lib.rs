@@ -45,10 +45,10 @@ pub fn get_coinbase_transactions(
 pub fn get_coinbase_transaction(
     id: i32,
     connection: &mut PgConnection,
-) -> Result<Vec<CoinbaseTransaction>, Error> {
+) -> Result<CoinbaseTransaction, Error> {
     coinbase_transactions
         .find(id)
-        .load::<CoinbaseTransaction>(connection)
+        .get_result::<CoinbaseTransaction>(connection)
 }
 
 // #[cfg(test)]

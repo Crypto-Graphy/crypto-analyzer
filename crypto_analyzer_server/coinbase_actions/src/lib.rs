@@ -6,25 +6,21 @@ pub fn get_coinbase_transaction(id: i32) -> ServerResponse<CoinbaseTransaction> 
     let mut connection = crypto_database::establish_connection();
     let result = crypto_database::get_coinbase_transaction(id, &mut connection);
 
-    let messages = result.as_ref().map_or(None, |transactions| {
-        transactions.first().map(|coinbase_transaction| {
-            vec![format!(
-                "Found coinbase transaction with id: {}",
-                &coinbase_transaction.id
-            )]
-        })
+    let messages = result.as_ref().map_or(None, |transaction| {
+        Some(vec![format!(
+            "Found coinbase transaction with id: {}",
+            &transaction.id
+        )])
     });
     let errors = match result.as_ref() {
         Ok(_) => None,
         Err(e) => Some(vec![format!("{}", e)]),
     };
-    let success = result.as_ref().is_ok();
-    let coinbase_transaction = result.unwrap_or_default().into_iter().next();
 
     ServerResponse::new(
         Default::default(),
-        success,
-        coinbase_transaction,
+        result.is_ok(),
+        result.ok(),
         messages,
         errors,
     )
