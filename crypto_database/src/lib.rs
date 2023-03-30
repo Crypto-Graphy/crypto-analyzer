@@ -9,9 +9,16 @@ use dotenvy::{self, dotenv};
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
 
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is a required env var");
-    PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+    // let host = std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string());
+    let host = std::env::var("host").unwrap_or("0.0.0.0".to_string());
+    let port = std::env::var("DB_PORT").unwrap_or("5432".to_string());
+    let user_name = std::env::var("DB_USER").unwrap_or("super_user".to_string());
+    let password = std::env::var("DB_PASSWORD").unwrap_or("password".to_string());
+    let database_name = std::env::var("DB_NAME").unwrap_or("crypto_database".to_string());
+    let db_url = format!("postgres://{user_name}:{password}@{host}:{port}/{database_name}");
+
+    PgConnection::establish(&db_url)
+        .unwrap_or_else(|_| panic!("Error connecting to {}", format!("{host}:{port}/{database_name}")))
 }
 
 pub fn insert_coinbase_transaction(
