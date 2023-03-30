@@ -9,16 +9,19 @@ use dotenvy::{self, dotenv};
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
 
-    // let host = std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string());
-    let host = std::env::var("host").unwrap_or("0.0.0.0".to_string());
+    let host = std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string());
     let port = std::env::var("DB_PORT").unwrap_or("5432".to_string());
     let user_name = std::env::var("DB_USER").unwrap_or("super_user".to_string());
     let password = std::env::var("DB_PASSWORD").unwrap_or("password".to_string());
-    let database_name = std::env::var("DB_NAME").unwrap_or("crypto_database".to_string());
+    let database_name = std::env::var("DB_NAME").unwrap_or("crypto_data".to_string());
     let db_url = format!("postgres://{user_name}:{password}@{host}:{port}/{database_name}");
 
-    PgConnection::establish(&db_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", format!("{host}:{port}/{database_name}")))
+    PgConnection::establish(&db_url).unwrap_or_else(|e| {
+        panic!(
+            "Error connecting to {}",
+            format!("{host}:{port}/{database_name}\noriginal error: {e}")
+        )
+    })
 }
 
 pub fn insert_coinbase_transaction(
@@ -56,6 +59,16 @@ pub fn get_coinbase_transaction(
     coinbase_transactions
         .find(id)
         .get_result::<CoinbaseTransaction>(connection)
+}
+
+#[cfg(test)]
+mod database_test {
+    use diesel::PgConnection;
+
+    #[test]
+    fn should_run_connection() {
+        // let connection: PgConnection = Connection::test_connection();
+    }
 }
 
 // #[cfg(test)]
