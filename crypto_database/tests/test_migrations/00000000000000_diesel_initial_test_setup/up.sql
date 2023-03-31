@@ -1,0 +1,1 @@
+CREATE DATABASE coinbase_insert_test

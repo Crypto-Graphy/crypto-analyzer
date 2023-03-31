@@ -1,0 +1,1 @@
+DROP DATABASE coinbase_insert_test

@@ -16,21 +16,21 @@ services:
     volumes:
       - crypto_data:/var/lib/postgresql/data
   
-  server:
-    image: crypto_analyzer_server
-    depends_on: 
-      - database
-    environment:
-      DB_HOST: ${database}
-      DB_PORT: 5432
+  # server:
+  #   image: crypto_analyzer_server
+  #   depends_on: 
+  #     - database
+  #   environment:
+  #     DB_HOST: ${database}
+  #     DB_PORT: 5432
 
-      ip_address: 0.0.0.0
-      port: 3000
-      # - DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data
-    expose:
-      - 3000
-    ports:
-      - 3000:3000
+  #     ip_address: 0.0.0.0
+  #     port: 3000
+  #     # - DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data
+  #   expose:
+  #     - 3000
+  #   ports:
+  #     - 3000:3000
 
 volumes:
   crypto_data:
