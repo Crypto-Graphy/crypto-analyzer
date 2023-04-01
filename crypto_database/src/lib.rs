@@ -64,6 +64,16 @@ pub fn get_coinbase_transaction(
         .get_result::<CoinbaseTransaction>(connection)
 }
 
+#[cfg(test)]
+mod database_test {
+    use diesel::PgConnection;
+
+    #[test]
+    fn should_run_connection() {
+        // let connection: PgConnection = Connection::test_connection();
+    }
+}
+
 // #[cfg(test)]
 // mod tests {
 //     use super::*;
