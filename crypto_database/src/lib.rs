@@ -4,7 +4,6 @@ mod schema;
 use self::models::*;
 use crate::schema::coinbase_transactions::dsl::coinbase_transactions;
 use diesel::{prelude::*, result::Error};
-use dotenvy::{self, dotenv};
 
 pub fn get_connection_string() -> (String, String, String) {
     let host = std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string());
@@ -20,11 +19,11 @@ pub fn get_connection_string() -> (String, String, String) {
     )
 }
 
-pub fn establish_connection() -> PgConnection {
+pub fn establish_connection() -> Result<PgConnection, ConnectionError> {
     let (db_url, host, port) = get_connection_string();
+    println!("Attempting to connect to {host}:{port}");
 
     PgConnection::establish(&db_url)
-        .unwrap_or_else(|_| panic!("Error connecting with connection: {}:{}", host, port))
 }
 
 pub fn insert_coinbase_transaction(

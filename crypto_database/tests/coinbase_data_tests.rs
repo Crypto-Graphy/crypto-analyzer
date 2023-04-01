@@ -1,7 +1,7 @@
 use crypto_database;
 
 mod crypto_database_should {
-    use diesel::{PgConnection, Connection};
+    use diesel::{Connection, PgConnection};
 
     #[test]
     fn insert_coinbase_transaction() {

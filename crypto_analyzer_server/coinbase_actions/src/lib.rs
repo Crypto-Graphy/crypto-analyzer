@@ -3,7 +3,8 @@ use server_response::ServerResponse;
 use uuid::Uuid;
 
 pub fn get_coinbase_transaction(id: i32) -> ServerResponse<CoinbaseTransaction> {
-    let mut connection = crypto_database::establish_connection();
+    let mut connection = crypto_database::establish_connection()
+        .expect("Failed to establish a connection to the database");
     let result = crypto_database::get_coinbase_transaction(id, &mut connection);
 
     let messages = result.as_ref().map_or(None, |transaction| {
@@ -30,7 +31,8 @@ pub fn get_coinbase_transactions(
     pagination: Pagination,
 ) -> ServerResponse<Vec<CoinbaseTransaction>> {
     // TODO: Probably shouldn't create a connection on every request. ... This may be handled behind the scenes in diesel. review
-    let mut connection = crypto_database::establish_connection();
+    let mut connection = crypto_database::establish_connection()
+        .expect("Failed to establish a connection to the database");
     let coinbase_transactions =
         crypto_database::get_coinbase_transactions(&pagination, &mut connection);
 
@@ -59,7 +61,8 @@ pub fn insert_coinbase_transaction(
     new_coinbase_transaction: NewCoinbaseTransaction,
 ) -> ServerResponse<CoinbaseTransaction> {
     // TODO: Probably shouldn't create a connection on every request. ... This may be handled behind the scenes in diesel. review
-    let mut connection = crypto_database::establish_connection();
+    let mut connection =
+        crypto_database::establish_connection().expect("Failed to establish db connection");
     let coinbase_transaction =
         crypto_database::insert_coinbase_transaction(new_coinbase_transaction, &mut connection);
 
