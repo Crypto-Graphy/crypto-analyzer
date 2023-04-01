@@ -5,7 +5,7 @@ use self::models::*;
 use crate::schema::coinbase_transactions::dsl::coinbase_transactions;
 use diesel::{prelude::*, result::Error};
 
-pub fn get_connection_string() -> (String, String, String) {
+pub fn get_connection_string() -> (String, String, String, String) {
     let host = std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string());
     let port = std::env::var("DB_PORT").unwrap_or("5432".to_string());
     let user_name = std::env::var("DB_USER").unwrap_or("super_user".to_string());
@@ -16,12 +16,13 @@ pub fn get_connection_string() -> (String, String, String) {
         format!("postgres://{user_name}:{password}@{host}:{port}/{database_name}"),
         host,
         port,
+        database_name,
     )
 }
 
 pub fn establish_connection() -> Result<PgConnection, ConnectionError> {
-    let (db_url, host, port) = get_connection_string();
-    println!("Attempting to connect to {host}:{port}");
+    let (db_url, host, port, db_name) = get_connection_string();
+    println!("Attempting to connect to {host}:{port}/{db_name}");
 
     PgConnection::establish(&db_url)
 }
@@ -62,24 +63,3 @@ pub fn get_coinbase_transaction(
         .find(id)
         .get_result::<CoinbaseTransaction>(connection)
 }
-
-#[cfg(test)]
-mod database_test {
-    use diesel::PgConnection;
-
-    #[test]
-    fn should_run_connection() {
-        // let connection: PgConnection = Connection::test_connection();
-    }
-}
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn it_works() {
-//         let result = add(2, 2);
-//         assert_eq!(result, 4);
-//     }
-// }
