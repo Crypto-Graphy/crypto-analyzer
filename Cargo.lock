@@ -338,6 +338,7 @@ dependencies = [
  "models",
  "rust_decimal",
  "serde",
+ "uuid",
 ]
 
 [[package]]

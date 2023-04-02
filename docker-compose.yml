@@ -15,17 +15,6 @@ services:
 
     volumes:
       - crypto_data:/var/lib/postgresql/data
-  
-  test-database:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: super_user
-      POSTGRES_DB: test_database
-    expose:
-      - 5433
-    ports:
-      - 5433:5433
       
 volumes:
   crypto_data:
