@@ -4,7 +4,7 @@ use diesel::prelude::*;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Serialize, Deserialize)]
+#[derive(Queryable, Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 #[serde(rename_all(serialize = "camelCase"))]
 pub struct CoinbaseTransaction {
     pub id: i32,
@@ -20,7 +20,7 @@ pub struct CoinbaseTransaction {
     pub notes: String,
 }
 
-#[derive(Insertable, Deserialize)]
+#[derive(Insertable, Deserialize, PartialEq, Eq, Clone)]
 #[diesel(table_name = coinbase_transactions)]
 pub struct NewCoinbaseTransaction {
     pub time_of_transaction: DateTime<Utc>,

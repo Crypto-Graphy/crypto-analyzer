@@ -1,5 +1,5 @@
 pub mod models;
-mod schema;
+pub mod schema;
 
 use self::models::*;
 use crate::schema::coinbase_transactions::dsl::coinbase_transactions;
@@ -10,7 +10,7 @@ pub fn get_connection_string() -> (String, String, String, String) {
     let port = std::env::var("DB_PORT").unwrap_or("5432".to_string());
     let user_name = std::env::var("DB_USER").unwrap_or("super_user".to_string());
     let password = std::env::var("DB_PASSWORD").unwrap_or("password".to_string());
-    let database_name = std::env::var("DB_NAME").unwrap_or("crypto_database".to_string());
+    let database_name = std::env::var("DB_NAME").unwrap_or("crypto_data".to_string());
 
     (
         format!("postgres://{user_name}:{password}@{host}:{port}/{database_name}"),
