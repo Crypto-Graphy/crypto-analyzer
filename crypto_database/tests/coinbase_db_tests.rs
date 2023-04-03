@@ -1,6 +1,7 @@
 mod common;
 
 mod coinbase_db_should {
+    use rand::{self, seq::SliceRandom, Rng};
     use std::sync::atomic::Ordering;
 
     use chrono::{DateTime, Utc};
@@ -9,9 +10,8 @@ mod coinbase_db_should {
         models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
         schema::coinbase_transactions,
     };
-    use diesel::{prelude::*, sql_query};
-    use rust_decimal::{prelude::Zero, Decimal};
-    use uuid::Uuid;
+    use diesel::prelude::*;
+    use rust_decimal::Decimal;
 
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
@@ -19,6 +19,41 @@ mod coinbase_db_should {
 
     // use crate::common;
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+
+    fn create_random_new_coinbase_transaction() -> NewCoinbaseTransaction {
+        let assets = vec!["ADA", "BTC", "SOL", "ETH"];
+        let mut rng = rand::thread_rng();
+
+        let time_of_transaction: DateTime<Utc> = DateTime::default();
+        let asset = assets
+            .get(rng.gen_range(0..assets.len()))
+            .unwrap()
+            .to_string();
+        let quantity_transacted = Decimal::new(rng.gen_range(0..100000), rng.gen_range(0..6));
+        let spot_price = Some(Decimal::new(rng.gen_range(0..40000), rng.gen_range(0..=2)));
+        let fees = Some(Decimal::new(rng.gen_range(0..10), 0));
+        let subtotal = spot_price.map(|price| price * quantity_transacted);
+        let total = subtotal.zip(fees).map(|(subtotal, fees)| subtotal + fees);
+        let notes = format!(
+            "Bought {} {} at {} USD",
+            quantity_transacted,
+            asset,
+            spot_price.unwrap()
+        );
+
+        NewCoinbaseTransaction {
+            time_of_transaction,
+            transaction_type: "BUY".to_string(),
+            asset,
+            quantity_transacted,
+            spot_price_currency: "USD".to_string(),
+            spot_price_at_transaction: spot_price,
+            subtotal,
+            total,
+            fees,
+            notes,
+        }
+    }
 
     fn create_test_context(db_id: u8) -> TestContext {
         let config = Config {
@@ -59,25 +94,13 @@ mod coinbase_db_should {
         let mut write_connection = ctx.create_connection();
         write_connection.run_pending_migrations(MIGRATIONS).unwrap();
 
-        let pagination = Default::default();
+        let pagination = Pagination::default();
 
         // Assure database is empty so we don't get a false positive match.
         let transactions = get_coinbase_transactions(&pagination, &mut write_connection).unwrap();
         assert_eq!(transactions.len(), 0);
 
-        let time: DateTime<Utc> = DateTime::default();
-        let new_coinbase_transaction = NewCoinbaseTransaction {
-            time_of_transaction: time.clone(),
-            transaction_type: "BUY".to_string(),
-            asset: "ADA".to_string(),
-            quantity_transacted: Decimal::new(2, 0),
-            spot_price_currency: "USD".to_string(),
-            spot_price_at_transaction: Some(Decimal::new(43, 2)),
-            subtotal: Some(Decimal::new(86, 2)),
-            total: Some(Decimal::new(86, 2)),
-            fees: Some(Decimal::zero()),
-            notes: "Bought 2 ADA at $0.43".to_string(),
-        };
+        let new_coinbase_transaction = create_random_new_coinbase_transaction();
 
         let inserted =
             insert_coinbase_transaction(new_coinbase_transaction.clone(), &mut write_connection)
@@ -94,7 +117,53 @@ mod coinbase_db_should {
             &expected_coinbase_transaction
         );
 
-        // Needs to be dropped before ctx. Since ctx deletes the database created here in this test.
+        // Needs to be dropped before ctx. Since ctx deletes the database connected here in this test.
         drop(write_connection);
+    }
+
+    #[test]
+    fn retrieve_existing_coinbase_transaction() {
+        let ctx = create_test_context(TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst));
+
+        let mut test_connection = ctx.create_connection();
+        test_connection.run_pending_migrations(MIGRATIONS).unwrap();
+
+        // Create transactions we're going to find.
+        let transactions_to_add = vec![
+            create_random_new_coinbase_transaction(),
+            create_random_new_coinbase_transaction(),
+            create_random_new_coinbase_transaction(),
+            create_random_new_coinbase_transaction(),
+            create_random_new_coinbase_transaction(),
+        ];
+
+        // Add the transactions above directly to the database, not using crypto_database.
+        let inserted_transactions = diesel::insert_into(coinbase_transactions::table)
+            .values(&transactions_to_add)
+            .get_results::<CoinbaseTransaction>(&mut test_connection)
+            .unwrap();
+
+        // Get the transactions from the database using crypto_database
+        let pagination = Pagination::default();
+        let coinbase_transactions =
+            crypto_database::get_coinbase_transactions(&pagination, &mut test_connection).unwrap();
+
+        // Loop though inserted transactions and transactions to add to contruct the expected coinbase_transaction object
+        // The id isn't known until it is inserted into the database
+        let mut expected_transactions = Vec::new();
+        for i in 0..transactions_to_add.len() {
+            let (transaction_to_add, inserted) = (
+                transactions_to_add.get(i).unwrap(),
+                inserted_transactions.get(i).unwrap(),
+            );
+
+            let expected =
+                create_coinbase_transaction_from_new(transaction_to_add.clone(), inserted.id);
+            expected_transactions.push(expected);
+        }
+
+        for i in 0..coinbase_transactions.len() {
+            assert_eq!(coinbase_transactions.get(i), expected_transactions.get(i));
+        }
     }
 }

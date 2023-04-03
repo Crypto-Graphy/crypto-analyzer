@@ -336,9 +336,9 @@ dependencies = [
  "diesel_migrations",
  "dotenvy",
  "models",
+ "rand",
  "rust_decimal",
  "serde",
- "uuid",
 ]
 
 [[package]]

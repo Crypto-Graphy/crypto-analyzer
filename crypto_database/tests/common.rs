@@ -15,13 +15,9 @@ pub struct Config {
 
 impl Config {
     pub fn create_db_url(&self) -> String {
-        format!("{}/{}", self.create_db_url_no_db_name(), &self.db_name)
-    }
-
-    pub fn create_db_url_no_db_name(&self) -> String {
         format!(
-            "postgres://{}:{}@{}:{}",
-            &self.user, &self.password, &self.host, &self.port,
+            "postgres://{}:{}@{}:{}/{}",
+            &self.user, &self.password, &self.host, &self.port, &self.db_name
         )
     }
 }
@@ -58,21 +54,10 @@ impl TestContext {
             .unwrap();
     }
 
-    // pub fn tear_down(&self, connection: &mut PgConnection) {
-    //     sql_query(format!("DROP DATABASE {}", &self.config.db_name))
-    //         .execute(connection)
-    //         .unwrap();
-    // }
-
     pub fn create_connection(&self) -> PgConnection {
         PgConnection::establish(&self.config.create_db_url())
             .expect("Failed to establish a connection with the database")
     }
-
-    // pub fn get_pure_connection(&self) -> PgConnection {
-    //     PgConnection::establish(&self.config.create_db_url())
-    //         .expect("Failed to establish a connection with the database")
-    // }
 
     pub fn set_env_from_config(&self) {
         std::env::set_var("DB_HOST", &self.config.host);
@@ -95,28 +80,6 @@ impl Drop for TestContext {
 // Easier to debug against tests than to create a runnable program to debug against.
 mod config_should {
     use super::Config;
-
-    #[test]
-    fn create_postgres_url_with_no_name() {
-        let host = "test-host".to_string();
-        let port = "test-port".to_string();
-        let user = "test-user".to_string();
-        let password = "test-password".to_string();
-        let db_name = "test-db-name".to_string();
-
-        let config = Config {
-            host: host.clone(),
-            port: port.clone(),
-            user: user.clone(),
-            password: password.clone(),
-            db_name: db_name.clone(),
-        };
-        let expected = format!("postgres://{}:{}@{}:{}", user, password, host, port);
-
-        let url = config.create_db_url_no_db_name();
-
-        assert_eq!(url, expected);
-    }
 
     #[test]
     fn create_postgres_url() {
