@@ -27,12 +27,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - run: DB_HOST=${PG_HOST} DB_PORT=${PG_PORT} DB_USER=${PG_USER} DB_PASSWORD=${PG_PASSWORD} DB_NAME=${PG_DATABASE} cargo test --all
-      # env: 
-      #   PG_HOST: postgres
-      #   PG_USER: postgres
-      #   PG_DATABASE: postgres
-      #   PG_PASSWORD: postgres
-      #   PG_PORT: ${{ job.services.postgres.ports['5432'] }}
+      env: 
+        PG_HOST: postgres
+        PG_USER: postgres
+        PG_DATABASE: postgres
+        PG_PASSWORD: postgres
+        # PG_PORT: ${{ job.services.postgres.ports['5432'] }}
         
  
   # Check formatting with rustfmt
