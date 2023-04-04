@@ -69,12 +69,6 @@ mod coinbase_db_should {
     fn create_test_context(db_id: u8) -> TestContext {
         let config = create_config_from_env_vars(Some(format!("test_database_{}", db_id)));
 
-        // Config {
-        //     db_name: format!("test_database_{}", db_id),
-        //     host: std::env::var("DB_NAME").unwrap_or("0.0.0.0".to_string()),
-        //     ..Default::default()
-        // };
-
         TestContext::new(
             config,
             crypto_database::establish_connection()
