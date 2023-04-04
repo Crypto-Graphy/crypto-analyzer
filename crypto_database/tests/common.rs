@@ -59,13 +59,13 @@ impl TestContext {
             .expect("Failed to establish a connection with the database")
     }
 
-    pub fn set_env_from_config(&self) {
-        std::env::set_var("DB_HOST", &self.config.host);
-        std::env::set_var("DB_PORT", &self.config.port);
-        std::env::set_var("DB_USER", &self.config.user);
-        std::env::set_var("DB_PASSWORD", &self.config.password);
-        std::env::set_var("DB_NAME", &self.config.db_name);
-    }
+    // pub fn set_env_from_config(&self) {
+    //     std::env::set_var("DB_HOST", &self.config.host);
+    //     std::env::set_var("DB_PORT", &self.config.port);
+    //     std::env::set_var("DB_USER", &self.config.user);
+    //     std::env::set_var("DB_PASSWORD", &self.config.password);
+    //     std::env::set_var("DB_NAME", &self.config.db_name);
+    // }
 }
 
 impl Drop for TestContext {
