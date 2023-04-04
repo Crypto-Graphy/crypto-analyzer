@@ -122,13 +122,13 @@ mod coinbase_db_should {
     }
 
     #[test]
-    fn retrieve_existing_coinbase_transaction() {
+    fn retrieve_existing_coinbase_transactions() {
         let ctx = create_test_context(TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst));
 
         let mut test_connection = ctx.create_connection();
         test_connection.run_pending_migrations(MIGRATIONS).unwrap();
 
-        // Create transactions we're going to find.
+        // Create transactions to be found.
         let transactions_to_add = vec![
             create_random_new_coinbase_transaction(),
             create_random_new_coinbase_transaction(),
@@ -164,6 +164,76 @@ mod coinbase_db_should {
 
         for i in 0..coinbase_transactions.len() {
             assert_eq!(coinbase_transactions.get(i), expected_transactions.get(i));
+        }
+    }
+
+    #[test]
+    fn page_retrieved_transactions() {
+        let ctx = create_test_context(TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst));
+
+        let mut test_connection = ctx.create_connection();
+        test_connection.run_pending_migrations(MIGRATIONS).unwrap();
+
+        // Create transactions to be found.
+        let transactions_to_add: Vec<NewCoinbaseTransaction> = (0..15)
+            .into_iter()
+            .map(|_| create_random_new_coinbase_transaction())
+            .collect();
+
+        // Add the transactions above directly to the database, not using crypto_database.
+        let inserted_transactions = diesel::insert_into(coinbase_transactions::table)
+            .values(&transactions_to_add)
+            .get_results::<CoinbaseTransaction>(&mut test_connection)
+            .unwrap();
+
+        // Loop though inserted transactions and transactions to add to contruct the expected coinbase_transaction object
+        // The id isn't known until it is inserted into the database
+
+        // First page
+        {
+            // Get the transactions from the database using crypto_database
+            let pagination = Pagination::default();
+            let coinbase_transactions =
+                crypto_database::get_coinbase_transactions(&pagination, &mut test_connection)
+                    .unwrap();
+
+            for i in 0..transactions_to_add.len() {
+                let (transaction_to_add, inserted) = (
+                    transactions_to_add.get(i).unwrap(),
+                    inserted_transactions.get(i).unwrap(),
+                );
+
+                let actual = coinbase_transactions.get(i).unwrap();
+                let expected =
+                    create_coinbase_transaction_from_new(transaction_to_add.clone(), inserted.id);
+                assert_eq!(actual, &expected);
+            }
+        }
+
+        // Second page
+        {
+            // Paginate to the next page of the list.
+            let pagination = Pagination {
+                page: 1,
+                items_per_page: 10,
+            };
+            let coinbase_transactions =
+                crypto_database::get_coinbase_transactions(&pagination, &mut test_connection)
+                    .unwrap();
+
+            for i in 0..coinbase_transactions.len() {
+                let (transaction_to_add, inserted) = (
+                    transactions_to_add.get(i).unwrap(),
+                    inserted_transactions
+                        .get(i + (pagination.page * pagination.items_per_page) as usize)
+                        .unwrap(),
+                );
+
+                let actual = coinbase_transactions.get(i).unwrap();
+                let expected =
+                    create_coinbase_transaction_from_new(transaction_to_add.clone(), inserted.id);
+                assert_eq!(&expected, actual);
+            }
         }
     }
 }
