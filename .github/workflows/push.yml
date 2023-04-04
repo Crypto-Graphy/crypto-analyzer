@@ -20,10 +20,12 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo test --all
+      - run: DB_HOST=localhost cargo test --all
  
   # Check formatting with rustfmt
   formatting:
