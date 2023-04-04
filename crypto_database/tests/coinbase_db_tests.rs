@@ -1,7 +1,7 @@
 mod common;
 
 mod coinbase_db_should {
-    use rand::{self, seq::SliceRandom, Rng};
+    use rand::{self, Rng};
     use std::sync::atomic::Ordering;
 
     use chrono::{DateTime, Utc};
@@ -73,7 +73,7 @@ mod coinbase_db_should {
         id: i32,
     ) -> CoinbaseTransaction {
         CoinbaseTransaction {
-            id: id,
+            id,
             time_of_transaction: new_coinbase_transaction.time_of_transaction,
             transaction_type: new_coinbase_transaction.transaction_type,
             asset: new_coinbase_transaction.asset,
@@ -176,7 +176,6 @@ mod coinbase_db_should {
 
         // Create transactions to be found.
         let transactions_to_add: Vec<NewCoinbaseTransaction> = (0..15)
-            .into_iter()
             .map(|_| create_random_new_coinbase_transaction())
             .collect();
 
