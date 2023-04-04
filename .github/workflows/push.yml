@@ -12,6 +12,8 @@ jobs:
       postgres:
         image: postgres
         env:
+          POSTGRES_HOST: 0.0.0.0
+          POSTGRES_PORT: 5432
           POSTGRES_PASSWORD: password
           POSTGRES_USER: super_user
           POSTGRES_DB: crypto_data
