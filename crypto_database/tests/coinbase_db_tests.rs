@@ -185,6 +185,7 @@ mod coinbase_db_should {
             .values(&transactions_to_add)
             .get_results::<CoinbaseTransaction>(&mut test_connection)
             .unwrap();
+        assert_eq!(transactions_to_add.len(), inserted_transactions.len());
 
         // Loop though inserted transactions and transactions to add to contruct the expected coinbase_transaction object
         // The id isn't known until it is inserted into the database
@@ -197,15 +198,21 @@ mod coinbase_db_should {
                 crypto_database::get_coinbase_transactions(&pagination, &mut test_connection)
                     .unwrap();
 
-            for i in 0..transactions_to_add.len() {
-                let (transaction_to_add, inserted) = (
-                    transactions_to_add.get(i).unwrap(),
-                    inserted_transactions.get(i).unwrap(),
-                );
+            assert_eq!(
+                coinbase_transactions.len(),
+                pagination.items_per_page as usize
+            );
+            assert_ne!(coinbase_transactions.len(), 0);
+
+            for i in 0..coinbase_transactions.len() {
+                let transaction_to_add = transactions_to_add.get(i).unwrap();
+                let inserted_transaction = inserted_transactions.get(i).unwrap();
 
                 let actual = coinbase_transactions.get(i).unwrap();
-                let expected =
-                    create_coinbase_transaction_from_new(transaction_to_add.clone(), inserted.id);
+                let expected = create_coinbase_transaction_from_new(
+                    transaction_to_add.clone(),
+                    inserted_transaction.id,
+                );
                 assert_eq!(actual, &expected);
             }
         }
@@ -221,18 +228,20 @@ mod coinbase_db_should {
                 crypto_database::get_coinbase_transactions(&pagination, &mut test_connection)
                     .unwrap();
 
-            for i in 0..coinbase_transactions.len() {
-                let (transaction_to_add, inserted) = (
-                    transactions_to_add.get(i).unwrap(),
-                    inserted_transactions
-                        .get(i + (pagination.page * pagination.items_per_page) as usize)
-                        .unwrap(),
-                );
+            assert_eq!(coinbase_transactions.len(), 5);
 
-                let actual = coinbase_transactions.get(i).unwrap();
+            for i in 0..coinbase_transactions.len() {
+                let inserted = inserted_transactions
+                    .get(i + (pagination.page * pagination.items_per_page) as usize)
+                    .unwrap();
+                let transaction_to_add = transactions_to_add
+                    .get(i + (pagination.page * pagination.items_per_page) as usize)
+                    .unwrap();
                 let expected =
                     create_coinbase_transaction_from_new(transaction_to_add.clone(), inserted.id);
-                assert_eq!(&expected, actual);
+
+                let actual = coinbase_transactions.get(i).unwrap();
+                assert_eq!(actual, &expected);
             }
         }
     }
