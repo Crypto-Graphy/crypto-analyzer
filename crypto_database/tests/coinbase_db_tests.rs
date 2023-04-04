@@ -20,6 +20,17 @@ mod coinbase_db_should {
     // use crate::common;
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
+    fn create_config_from_env_vars(db_name: Option<String>) -> Config {
+        Config {
+            host: std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string()),
+            port: std::env::var("DB_PORT").unwrap_or("5432".to_string()),
+            user: std::env::var("DB_USER").unwrap_or("super_user".to_string()),
+            password: std::env::var("DB_PASSWORD").unwrap_or("password".to_string()),
+            db_name: db_name
+                .unwrap_or(std::env::var("DB_NAME").unwrap_or("crypto_data".to_string())),
+        }
+    }
+
     fn create_random_new_coinbase_transaction() -> NewCoinbaseTransaction {
         let assets = vec!["ADA", "BTC", "SOL", "ETH"];
         let mut rng = rand::thread_rng();
@@ -56,10 +67,13 @@ mod coinbase_db_should {
     }
 
     fn create_test_context(db_id: u8) -> TestContext {
-        let config = Config {
-            db_name: format!("test_database_{}", db_id),
-            ..Default::default()
-        };
+        let config = create_config_from_env_vars(Some(format!("test_database_{}", db_id)));
+
+        // Config {
+        //     db_name: format!("test_database_{}", db_id),
+        //     host: std::env::var("DB_NAME").unwrap_or("0.0.0.0".to_string()),
+        //     ..Default::default()
+        // };
 
         TestContext::new(
             config,
