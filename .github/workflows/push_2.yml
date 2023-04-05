@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: docker compose up
+      - run: docker compose up -d
       - run: cargo test --workspace
       # - env:
       #     PG_HOST: postgres
