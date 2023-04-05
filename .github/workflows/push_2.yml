@@ -1,0 +1,28 @@
+jobs:
+  test:
+    name: cargo test
+    runs-on: ubuntu-latest
+    container: rust
+    # services:
+    #   postgres:
+    #     image: postgres
+    #     env:
+    #       POSTGRES_PASSWORD: password
+    #       POSTGRES_USER: super_user
+    #       POSTGRES_DB: crypto_data
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #     ports:
+    #     - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: docker compose up
+      - run: cargo test --workspace
+      # - env:
+      #     PG_HOST: postgres
+      #   run: DB_HOST=${PG_HOST} cargo test --all
