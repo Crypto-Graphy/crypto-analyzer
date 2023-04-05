@@ -2,7 +2,7 @@ jobs:
   test:
     name: cargo test
     runs-on: ubuntu-latest
-    container: rust
+    # container: rust
     # services:
     #   postgres:
     #     image: postgres
