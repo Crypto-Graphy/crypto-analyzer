@@ -1,3 +1,9 @@
+name: "Test Suite Temp"
+on:
+  push:
+  pull_request:
+
+
 jobs:
   test:
     name: cargo test
