@@ -8,9 +8,13 @@ edition = "2021"
 [dependencies]
 axum = "0.6.10"
 tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
+coinbase_actions = { path = "./coinbase_actions" }
 parse_csv = { path = "./parse_csv" }
+server_response = { path = "./server_response" }
+crypto_database = { path = "../crypto_database" }
 serde.workspace = true
 chrono.workspace = true
+
 
 [dev-dependencies]
 coinbase_transactions = { path = "../coinbase_transactions" } # Used in unit testing

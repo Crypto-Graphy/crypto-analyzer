@@ -1,8 +1,10 @@
 FROM rust as builder
-WORKDIR /usr/src/crypto-analyzer
+WORKDIR /usr/src/crypto_analyzer_server
 COPY . .
-RUN cargo install --path=.
+RUN cargo install --path=./crypto_analyzer_server
 
-FROM debian:buster-slim
-COPY --from=builder /usr/local/cargo/bin/crypto-analyzer /usr/local/bin/crypto-analyzer
-CMD ["crypto-analyzer"]
+FROM ubuntu
+RUN apt-get update
+RUN apt-get install -y libpq-dev # diesel dependency for postgres
+COPY --from=builder /usr/local/cargo/bin/crypto_analyzer_server /usr/local/bin/crypto_analyzer_server
+CMD ["crypto_analyzer_server"]
