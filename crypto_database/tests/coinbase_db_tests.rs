@@ -6,7 +6,8 @@ mod coinbase_db_should {
 
     use chrono::{DateTime, Utc};
     use crypto_database::{
-        get_coinbase_transactions, insert_coinbase_transaction,
+        self,
+        coinbase_db::{self, get_coinbase_transactions, insert_coinbase_transaction},
         models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
         schema::coinbase_transactions,
     };
@@ -15,7 +16,7 @@ mod coinbase_db_should {
 
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-    use crate::common::{Config, TestContext, TEST_DB_COUNTER};
+    use super::common::{Config, TestContext, TEST_DB_COUNTER};
 
     // use crate::common;
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
@@ -154,7 +155,7 @@ mod coinbase_db_should {
         // Get the transactions from the database using crypto_database
         let pagination = Pagination::default();
         let coinbase_transactions =
-            crypto_database::get_coinbase_transactions(&pagination, &mut test_connection).unwrap();
+            coinbase_db::get_coinbase_transactions(&pagination, &mut test_connection).unwrap();
 
         // Loop though inserted transactions and transactions to add to contruct the expected coinbase_transaction object
         // The id isn't known until it is inserted into the database
@@ -202,8 +203,7 @@ mod coinbase_db_should {
             // Get the transactions from the database using crypto_database
             let pagination = Pagination::default();
             let coinbase_transactions =
-                crypto_database::get_coinbase_transactions(&pagination, &mut test_connection)
-                    .unwrap();
+                coinbase_db::get_coinbase_transactions(&pagination, &mut test_connection).unwrap();
 
             assert_eq!(
                 coinbase_transactions.len(),
@@ -232,8 +232,7 @@ mod coinbase_db_should {
                 items_per_page: 10,
             };
             let coinbase_transactions =
-                crypto_database::get_coinbase_transactions(&pagination, &mut test_connection)
-                    .unwrap();
+                coinbase_db::get_coinbase_transactions(&pagination, &mut test_connection).unwrap();
 
             assert_eq!(coinbase_transactions.len(), 5);
 
