@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+
 
 use chrono::{DateTime, Utc};
 use coinbase_transactions::transaction_parser::{
-    self, get_book_of_record, get_total_staking_rewards_map, CoinbaseTransactionRecord,
+    get_book_of_record, get_total_staking_rewards_map, CoinbaseTransactionRecord,
 };
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use rand::Rng;
@@ -48,11 +48,9 @@ fn create_random_new_coinbase_transaction(
 
 fn criterion_benchmark(c: &mut Criterion) {
     let coinbase_records: Vec<CoinbaseTransactionRecord> = (0..350)
-        .into_iter()
         .map(|_| create_random_new_coinbase_transaction(None))
         .collect();
     let rewards_map: Vec<CoinbaseTransactionRecord> = (0..400)
-        .into_iter()
         .map(|_| create_random_new_coinbase_transaction(Some("Reward".to_string())))
         .collect();
     c.bench_function("Book of size 350", |b| {
