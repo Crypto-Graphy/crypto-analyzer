@@ -1,5 +1,3 @@
-
-
 use chrono::{DateTime, Utc};
 use coinbase_transactions::transaction_parser::{
     get_book_of_record, get_total_staking_rewards_map, CoinbaseTransactionRecord,
