@@ -39,7 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: cargo bench       
+      - run: cargo bench
+      - run: cat target/criterion/report/index.html >> $GITHUB_STEP_SUMMARY
  
   # Check formatting with rustfmt
   formatting:
