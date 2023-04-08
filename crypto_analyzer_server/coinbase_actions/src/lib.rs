@@ -1,11 +1,15 @@
-use crypto_database::models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination};
+use crypto_database::{
+    self,
+    coinbase_db::{self},
+    models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
+};
 use server_response::ServerResponse;
 use uuid::Uuid;
 
 pub fn get_coinbase_transaction(id: i32) -> ServerResponse<CoinbaseTransaction> {
     let mut connection = crypto_database::establish_connection()
         .expect("Failed to establish a connection to the database");
-    let result = crypto_database::get_coinbase_transaction(id, &mut connection);
+    let result = coinbase_db::get_coinbase_transaction(id, &mut connection);
 
     let messages = result.as_ref().map_or(None, |transaction| {
         Some(vec![format!(
@@ -34,7 +38,7 @@ pub fn get_coinbase_transactions(
     let mut connection = crypto_database::establish_connection()
         .expect("Failed to establish a connection to the database");
     let coinbase_transactions =
-        crypto_database::get_coinbase_transactions(&pagination, &mut connection);
+        coinbase_db::get_coinbase_transactions(&pagination, &mut connection);
 
     let messages = coinbase_transactions.as_ref().map_or(None, |cts| {
         Some(vec![format!(
@@ -64,7 +68,7 @@ pub fn insert_coinbase_transaction(
     let mut connection =
         crypto_database::establish_connection().expect("Failed to establish db connection");
     let coinbase_transaction =
-        crypto_database::insert_coinbase_transaction(new_coinbase_transaction, &mut connection);
+        coinbase_db::insert_coinbase_transaction(new_coinbase_transaction, &mut connection);
 
     let messages = coinbase_transaction.as_ref().map_or(None, |ct| {
         Some(vec![format!(
