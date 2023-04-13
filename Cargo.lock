@@ -326,6 +326,7 @@ dependencies = [
  "diesel_migrations",
  "dotenvy",
  "models",
+ "models_db",
  "rand",
  "rust_decimal",
  "serde",
@@ -828,6 +829,16 @@ name = "models"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "rust_decimal",
+ "serde",
+]
+
+[[package]]
+name = "models_db"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "diesel",
  "rust_decimal",
  "serde",
 ]

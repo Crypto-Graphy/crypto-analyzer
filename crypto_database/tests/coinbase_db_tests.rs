@@ -7,9 +7,10 @@ mod coinbase_db_should {
     use chrono::{DateTime, Utc};
     use crypto_database::{
         self,
-        coinbase_db::{self, get_coinbase_transactions, insert_coinbase_transaction},
-        models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
-        schema::coinbase_transactions,
+        coinbase_db::{
+            self, get_coinbase_transactions, insert_coinbase_transaction,
+            schema::coinbase_transactions, CoinbaseTransaction, NewCoinbaseTransaction, Pagination,
+        },
     };
     use diesel::prelude::*;
     use rust_decimal::Decimal;

@@ -1,3 +1,5 @@
+pub mod schema;
+
 use crate::schema::coinbase_transactions;
 use chrono::prelude::*;
 use diesel::prelude::*;
