@@ -1,4 +1,55 @@
+use std::collections::HashMap;
+
+use models::coinbase::CoinbaseTransactionRecord;
+use models_db::CoinbaseTransaction;
+use rust_decimal::Decimal;
+
+pub trait StakingRewards<T> {
+    fn total_staking_rewards_map(
+        transactions: impl for<'a> Iterator<Item = T>,
+    ) -> HashMap<String, Decimal>;
+}
+
+pub struct CoinbaseParser;
+
+impl StakingRewards<CoinbaseTransactionRecord> for CoinbaseParser {
+    fn total_staking_rewards_map(
+        transactions: impl for<'a> Iterator<Item = CoinbaseTransactionRecord>,
+    ) -> HashMap<String, Decimal> {
+        transactions
+            .filter(|transcation| transcation.transaction_type.eq("Rewards Income"))
+            .fold(HashMap::new(), |mut reward_map, record| {
+                if let Some(value) = reward_map.get(&record.asset) {
+                    reward_map.insert(record.asset.to_string(), value + record.quantity_transacted);
+                } else {
+                    reward_map.insert(record.asset.to_string(), record.quantity_transacted);
+                }
+
+                reward_map
+            })
+    }
+}
+
+impl StakingRewards<CoinbaseTransaction> for CoinbaseParser {
+    fn total_staking_rewards_map(
+        transactions: impl for<'a> Iterator<Item = CoinbaseTransaction>,
+    ) -> HashMap<String, Decimal> {
+        transactions
+            .filter(|transcation| transcation.transaction_type.eq("Rewards Income"))
+            .fold(HashMap::new(), |mut reward_map, record| {
+                if let Some(value) = reward_map.get(&record.asset) {
+                    reward_map.insert(record.asset.to_string(), value + record.quantity_transacted);
+                } else {
+                    reward_map.insert(record.asset.to_string(), record.quantity_transacted);
+                }
+
+                reward_map
+            })
+    }
+}
+
 pub mod transaction_parser {
+
     extern crate models;
     extern crate rust_decimal;
 
@@ -30,22 +81,6 @@ pub mod transaction_parser {
         "Advanced Trade Buy",
     ];
     const OUTPUT_TRANSACTIONS: &[&str] = &["Sell", "Send", "CardSpend"];
-
-    pub fn get_total_staking_rewards_map<'a>(
-        transactions: impl Iterator<Item = &'a CoinbaseTransactionRecord>,
-    ) -> HashMap<String, Decimal> {
-        transactions
-            .filter(|transcation| transcation.transaction_type.eq("Rewards Income"))
-            .fold(HashMap::new(), |mut reward_map, record| {
-                if let Some(value) = reward_map.get(&record.asset) {
-                    reward_map.insert(record.asset.to_string(), value + record.quantity_transacted);
-                } else {
-                    reward_map.insert(record.asset.to_string(), record.quantity_transacted);
-                }
-
-                reward_map
-            })
-    }
 
     pub fn get_input_transactions<'a>(
         transactions: impl Iterator<Item = &'a CoinbaseTransactionRecord>,

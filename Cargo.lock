@@ -287,6 +287,7 @@ dependencies = [
  "csv",
  "csv_parser",
  "models",
+ "models_db",
  "rand",
  "rust_decimal",
  "serde",
