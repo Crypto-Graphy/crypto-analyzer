@@ -1,8 +1,5 @@
 use diesel::*;
 
-pub mod models;
-pub mod schema;
-
 pub fn get_connection_string() -> (String, String, String, String) {
     let host = std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string());
     let port = std::env::var("DB_PORT").unwrap_or("5432".to_string());
@@ -26,9 +23,12 @@ pub fn establish_connection() -> Result<PgConnection, ConnectionError> {
 }
 
 pub mod coinbase_db {
-    use super::models::*;
-    use crate::schema::coinbase_transactions::dsl::coinbase_transactions;
     use diesel::{prelude::*, result::Error};
+    pub use models_db::{
+        self,
+        schema::{self, coinbase_transactions::dsl::coinbase_transactions},
+        CoinbaseTransaction, NewCoinbaseTransaction, Pagination,
+    };
 
     pub fn insert_coinbase_transaction(
         new_coinbase_transaction: NewCoinbaseTransaction,

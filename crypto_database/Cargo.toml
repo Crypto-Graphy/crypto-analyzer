@@ -4,13 +4,14 @@ version.workspace = true
 edition = "2021"
 
 [dependencies]
-diesel = { version = "2.0.3", features = ["postgres", "chrono", "numeric"] }
+diesel.workspace = true
 chrono.workspace = true
 rust_decimal.workspace = true
 models = { path = "../models" }
 serde.workspace = true
 dotenvy = "0.15.7"
 diesel_migrations = { version = "2.0.0", features = ["postgres"] }
+models_db = { path = "../models_db" }
 
 [dev-dependencies]
 rand = "0.8.5"

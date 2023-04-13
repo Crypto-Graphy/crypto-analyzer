@@ -28,10 +28,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - env:
           PG_HOST: postgres
-          # PG_USER: postgres
-          # PG_PASSWORD: postgres
         run: DB_HOST=${PG_HOST} cargo test --all
-        # PG_PORT: ${{ job.services.postgres.ports['5432'] }}
         
  
   # Check formatting with rustfmt

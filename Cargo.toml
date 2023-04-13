@@ -8,6 +8,7 @@ members = [
     "csv_parser",
     "models",
     "crypto_database",
+    "models_db",
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -24,3 +25,4 @@ csv = "1.2.0"
 serde = { version = "1.0.153", features = ["serde_derive"] }
 chrono = { version = "0.4.24", features = ["serde"] }
 uuid = { version = "1.3.0", features = ["serde", "v4", "macro-diagnostics"] }
+diesel = { version = "2.0.3", features = ["postgres", "chrono", "numeric"] }

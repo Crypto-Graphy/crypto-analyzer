@@ -4,7 +4,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use crypto_database::models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination};
+use crypto_database::coinbase_db::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination};
 use parse_csv::{parse_csv, CsvType};
 use server_response::ServerResponse;
 use std::{env, net::SocketAddr, str::FromStr};

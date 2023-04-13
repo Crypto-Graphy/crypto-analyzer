@@ -1,7 +1,7 @@
 use std::time::SystemTime;
 
 use coinbase_transactions::transaction_parser::CoinbaseTransactionRecord;
-use crypto_database::models::NewCoinbaseTransaction;
+use crypto_database::coinbase_db::NewCoinbaseTransaction;
 use csv_parser::{Csv, CsvParser};
 
 fn main() {

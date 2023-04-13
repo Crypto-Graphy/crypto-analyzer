@@ -1,7 +1,6 @@
 use crypto_database::{
     self,
-    coinbase_db::{self},
-    models::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
+    coinbase_db::{self, CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
 };
 use server_response::ServerResponse;
 use uuid::Uuid;
