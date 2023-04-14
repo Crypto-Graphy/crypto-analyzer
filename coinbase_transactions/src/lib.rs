@@ -17,6 +17,34 @@ impl<T> CoinbaseParser<T> {
 }
 
 impl StakingRewards<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTransactionRecord> {
+    ///
+    /// Generates rewards based on the vector of CoinbaseTransactionRecords contained within the struct.
+    /// ```
+    /// # use rust_decimal::Decimal;
+    /// # use std::collections::HashMap;
+    /// # use chrono::{DateTime, Utc};
+    /// # use models::coinbase::CoinbaseTransactionRecord;
+    /// # use coinbase_transactions::{CoinbaseParser, StakingRewards};
+    /// let coinbase_parser = CoinbaseParser::new(
+    ///     vec![
+    ///         CoinbaseTransactionRecord {
+    ///             time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///             transaction_type: "Rewards Income".to_string(),
+    ///             asset: "DOT".to_string(),
+    ///             quantity_transacted: Decimal::new(22028, 6),
+    ///             spot_price_currency: "USD".to_string(),
+    ///             spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+    ///             subtotal: Some(Decimal::new(9701, 2)),
+    ///             total: Some(Decimal::new(100, 0)),
+    ///             fees: None,
+    ///             notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+    ///         },
+    ///     ]
+    /// );
+    /// let rewards = coinbase_parser.staking_rewards();
+    /// let expected = Decimal::new(22028, 6);
+    /// assert_eq!(rewards.get("DOT"), Some(&expected));
+    /// ```
     fn staking_rewards(&self) -> HashMap<String, Decimal> {
         self.data
             .iter()
@@ -34,6 +62,35 @@ impl StakingRewards<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTransa
 }
 
 impl StakingRewards<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransaction> {
+    ///
+    /// Generates rewards based on the vector of CoinbaseTransactionRecords contained within the struct.
+    /// ```
+    /// # use rust_decimal::Decimal;
+    /// # use std::collections::HashMap;
+    /// # use chrono::{DateTime, Utc};
+    /// # use models_db::CoinbaseTransaction;
+    /// # use coinbase_transactions::{CoinbaseParser, StakingRewards};
+    /// let coinbase_parser = CoinbaseParser::new(
+    ///     vec![
+    ///         CoinbaseTransaction {
+    ///             id: 3,
+    ///             time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///             transaction_type: "Rewards Income".to_string(),
+    ///             asset: "DOT".to_string(),
+    ///             quantity_transacted: Decimal::new(22028, 6),
+    ///             spot_price_currency: "USD".to_string(),
+    ///             spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+    ///             subtotal: Some(Decimal::new(9701, 2)),
+    ///             total: Some(Decimal::new(100, 0)),
+    ///             fees: None,
+    ///             notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+    ///         },
+    ///     ]
+    /// );
+    /// let rewards = coinbase_parser.staking_rewards();
+    /// let expected = Decimal::new(22028, 6);
+    /// assert_eq!(rewards.get("DOT"), Some(&expected));
+    /// ```
     fn staking_rewards(&self) -> HashMap<String, Decimal> {
         self.data
             .iter()
