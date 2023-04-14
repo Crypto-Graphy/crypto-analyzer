@@ -4,9 +4,7 @@ use models::coinbase::CoinbaseTransactionRecord;
 use models_db::CoinbaseTransaction;
 use rust_decimal::Decimal;
 
-pub trait StakingRewards<T> {
-    fn staking_rewards(&self) -> HashMap<String, Decimal>;
-}
+pub use models::StakingRewards;
 
 pub struct CoinbaseParser<T> {
     data: Vec<T>,
@@ -53,112 +51,227 @@ impl StakingRewards<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransaction>
 }
 
 #[cfg(test)]
-mod staking_reward_should {
-    use crate::{CoinbaseParser, StakingRewards};
+mod staking_reward_for {
+    mod coinbase_transaction_record {
+        use crate::{CoinbaseParser, StakingRewards};
 
-    use super::CoinbaseTransactionRecord;
-    use chrono::{DateTime, Utc};
-    use rand::Rng;
-    use rust_decimal::Decimal;
+        use crate::CoinbaseTransactionRecord;
+        use chrono::{DateTime, Utc};
+        use rand::Rng;
+        use rust_decimal::Decimal;
 
-    #[test]
-    fn get_total_staking_rewards_returns_with_multiple_asset_types() {
-        let sample_vec = vec![
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Rewards Income".to_string(),
-                asset: "DOT".to_string(),
-                quantity_transacted: Decimal::new(22028, 6),
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Rewards Income".to_string(),
-                asset: "ALGO".to_string(),
-                quantity_transacted: Decimal::new(16458, 7),
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-        ];
+        #[test]
+        fn total_staking_rewards_returns_with_multiple_asset_types() {
+            let sample_vec = vec![
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(22028, 6),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "ALGO".to_string(),
+                    quantity_transacted: Decimal::new(16458, 7),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
 
-        let coinbase_parser = CoinbaseParser::new(sample_vec);
-        let actual = coinbase_parser.staking_rewards();
+            let coinbase_parser = CoinbaseParser::new(sample_vec);
+            let actual = coinbase_parser.staking_rewards();
 
-        // Keys
-        let expected_keys = ["DOT", "ALGO"];
-        assert_eq!(actual.len(), 2);
-        expected_keys
-            .iter()
-            .for_each(|key| assert!(actual.contains_key(&key.to_string())));
+            // Keys
+            let expected_keys = ["DOT", "ALGO"];
+            assert_eq!(actual.len(), 2);
+            expected_keys
+                .iter()
+                .for_each(|key| assert!(actual.contains_key(&key.to_string())));
 
-        // Values
-        let mut values = actual.values().cloned().collect::<Vec<Decimal>>();
-        values.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        assert_eq!(values[0], Decimal::new(16458, 7));
-        assert_eq!(values[1], Decimal::new(22028, 6));
+            // Values
+            let mut values = actual.values().cloned().collect::<Vec<Decimal>>();
+            values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            assert_eq!(values[0], Decimal::new(16458, 7));
+            assert_eq!(values[1], Decimal::new(22028, 6));
+        }
+
+        #[test]
+        fn total_staking_rewards_sums_transacted() {
+            let mut rng = rand::thread_rng();
+
+            let range = 0.010448745..2000.00022123;
+            let given_transaction_1 =
+                Decimal::from_str_radix(&rng.gen_range(range.clone()).to_string(), 10).unwrap();
+            let given_transaction_2 =
+                Decimal::from_str_radix(&rng.gen_range(range).to_string(), 10).unwrap();
+
+            let sample_vec = vec![
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: given_transaction_1,
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: given_transaction_2,
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
+            let expected_transacted = given_transaction_1 + given_transaction_2;
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec);
+            let actual = coinbase_parser.staking_rewards();
+
+            assert_eq!(*actual.get("DOT").unwrap(), expected_transacted);
+        }
+
+        #[test]
+        fn total_staking_rewards_when_given_empty_vec() {
+            let sample_vec: Vec<CoinbaseTransactionRecord> = Vec::new();
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec);
+            let actual = coinbase_parser.staking_rewards();
+
+            assert!(actual.is_empty());
+        }
     }
 
-    #[test]
-    fn get_total_staking_rewards_sums_transacted() {
-        let mut rng = rand::thread_rng();
+    mod coinbase_transaction {
+        use chrono::{DateTime, Utc};
+        use models_db::CoinbaseTransaction;
+        use rand::Rng;
+        use rust_decimal::Decimal;
 
-        let range = 0.010448745..2000.00022123;
-        let given_transaction_1 =
-            Decimal::from_str_radix(&rng.gen_range(range.clone()).to_string(), 10).unwrap();
-        let given_transaction_2 =
-            Decimal::from_str_radix(&rng.gen_range(range).to_string(), 10).unwrap();
+        use crate::{CoinbaseParser, StakingRewards};
 
-        let sample_vec = vec![
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Rewards Income".to_string(),
-                asset: "DOT".to_string(),
-                quantity_transacted: given_transaction_1,
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Rewards Income".to_string(),
-                asset: "DOT".to_string(),
-                quantity_transacted: given_transaction_2,
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-        ];
-        let expected_transacted = given_transaction_1 + given_transaction_2;
+        #[test]
+        fn total_staking_rewards_returns_with_multiple_asset_types() {
+            let sample_vec = vec![
+                CoinbaseTransaction {
+                    id: 202227,
+                    time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(22028, 6),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransaction {
+                    id: 37222,
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "ALGO".to_string(),
+                    quantity_transacted: Decimal::new(16458, 7),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
 
-        let coinbase_parser = CoinbaseParser::new(sample_vec);
-        let actual = coinbase_parser.staking_rewards();
+            let coinbase_parser = CoinbaseParser::new(sample_vec);
+            let actual = coinbase_parser.staking_rewards();
 
-        assert_eq!(*actual.get("DOT").unwrap(), expected_transacted);
-    }
+            // Keys
+            let expected_keys = ["DOT", "ALGO"];
+            assert_eq!(actual.len(), 2);
+            expected_keys
+                .iter()
+                .for_each(|key| assert!(actual.contains_key(&key.to_string())));
 
-    #[test]
-    fn get_total_staking_rewards_when_given_empty_vec() {
-        let sample_vec: Vec<CoinbaseTransactionRecord> = Vec::new();
+            // Values
+            let mut values = actual.values().cloned().collect::<Vec<Decimal>>();
+            values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            assert_eq!(values[0], Decimal::new(16458, 7));
+            assert_eq!(values[1], Decimal::new(22028, 6));
+        }
 
-        let coinbase_parser = CoinbaseParser::new(sample_vec);
-        let actual = coinbase_parser.staking_rewards();
+        #[test]
+        fn total_staking_rewards_sums_transacted() {
+            let mut rng = rand::thread_rng();
 
-        assert!(actual.is_empty());
+            let range = 0.010448745..2000.00022123;
+            let given_transaction_1 =
+                Decimal::from_str_radix(&rng.gen_range(range.clone()).to_string(), 10).unwrap();
+            let given_transaction_2 =
+                Decimal::from_str_radix(&rng.gen_range(range).to_string(), 10).unwrap();
+
+            let sample_vec = vec![
+                CoinbaseTransaction {
+                    id: 20684,
+                    time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: given_transaction_1,
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransaction {
+                    id: 101,
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Rewards Income".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: given_transaction_2,
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
+            let expected_transacted = given_transaction_1 + given_transaction_2;
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec);
+            let actual = coinbase_parser.staking_rewards();
+
+            assert_eq!(*actual.get("DOT").unwrap(), expected_transacted);
+        }
+
+        #[test]
+        fn get_total_staking_rewards_when_given_empty_vec() {
+            let sample_vec: Vec<CoinbaseTransaction> = Vec::new();
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec);
+            let actual = coinbase_parser.staking_rewards();
+
+            assert!(actual.is_empty());
+        }
     }
 }
 
@@ -279,8 +392,6 @@ mod test {
     extern crate models;
     extern crate rand;
     extern crate rust_decimal;
-
-    use self::rand::Rng;
 
     use self::models::coinbase::CoinbaseTransactionRecord;
 

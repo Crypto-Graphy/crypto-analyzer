@@ -1,3 +1,11 @@
+use rust_decimal::Decimal;
+use std::collections::HashMap;
+
+// TODO: This is not the right place for this trait.
+pub trait StakingRewards<T> {
+    fn staking_rewards(&self) -> HashMap<String, Decimal>;
+}
+
 pub mod coinbase {
     pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
