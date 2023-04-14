@@ -264,7 +264,7 @@ mod staking_reward_for {
         }
 
         #[test]
-        fn get_total_staking_rewards_when_given_empty_vec() {
+        fn total_staking_rewards_when_given_empty_vec() {
             let sample_vec: Vec<CoinbaseTransaction> = Vec::new();
 
             let coinbase_parser = CoinbaseParser::new(sample_vec);
