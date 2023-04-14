@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use models::coinbase::CoinbaseTransactionRecord;
+use models::{coinbase::CoinbaseTransactionRecord, InputTransactions};
 use models_db::CoinbaseTransaction;
 use rust_decimal::Decimal;
 
@@ -16,7 +16,7 @@ impl<T> CoinbaseParser<T> {
     }
 }
 
-impl StakingRewards<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTransactionRecord> {
+impl StakingRewards for CoinbaseParser<CoinbaseTransactionRecord> {
     ///
     /// Generates rewards based on the vector of CoinbaseTransactionRecords contained within the struct.
     /// ```
@@ -61,7 +61,7 @@ impl StakingRewards<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTransa
     }
 }
 
-impl StakingRewards<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransaction> {
+impl StakingRewards for CoinbaseParser<CoinbaseTransaction> {
     ///
     /// Generates rewards based on the vector of CoinbaseTransaction contained within the struct.
     /// ```
@@ -106,6 +106,31 @@ impl StakingRewards<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransaction>
             })
     }
 }
+
+impl InputTransactions<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTransactionRecord> {
+    fn input_transactions(&self) -> Vec<&CoinbaseTransactionRecord> {
+        let input_transactions: &[&str] = &[
+            "Buy",
+            "Receive",
+            "Rewards Income",
+            "CardBuyBack",
+            "Learning Reward",
+            "Advanced Trade Buy",
+        ];
+
+        self.data
+            .iter()
+            .filter(|transaction| {
+                input_transactions.iter().any(|received_transaction_type| {
+                    received_transaction_type.eq(&transaction.transaction_type)
+                })
+            })
+            .collect()
+    }
+}
+
+#[cfg(test)]
+mod input_transactions_for {}
 
 #[cfg(test)]
 mod staking_reward_for {

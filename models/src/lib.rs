@@ -2,8 +2,12 @@ use rust_decimal::Decimal;
 use std::collections::HashMap;
 
 // TODO: This is not the right place for this trait.
-pub trait StakingRewards<T> {
+pub trait StakingRewards {
     fn staking_rewards(&self) -> HashMap<String, Decimal>;
+}
+
+pub trait InputTransactions<T> {
+    fn input_transactions(&self) -> Vec<&T>;
 }
 
 pub mod coinbase {
