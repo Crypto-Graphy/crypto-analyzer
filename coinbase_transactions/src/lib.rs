@@ -63,7 +63,7 @@ impl StakingRewards<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTransa
 
 impl StakingRewards<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransaction> {
     ///
-    /// Generates rewards based on the vector of CoinbaseTransactionRecords contained within the struct.
+    /// Generates rewards based on the vector of CoinbaseTransaction contained within the struct.
     /// ```
     /// # use rust_decimal::Decimal;
     /// # use std::collections::HashMap;
