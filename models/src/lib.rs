@@ -10,10 +10,27 @@ pub trait InputTransactions<T> {
     fn input_transactions(&self) -> Vec<&T>;
 }
 
+pub trait ActiveAssetValues {
+    fn active_assets(&self) -> HashMap<String, Decimal>;
+}
+
 pub mod coinbase {
     pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
     use serde::{Deserialize, Serialize};
+
+    pub const INCLUDE_TRANSACTIONS: &[&str] = &[
+        "Buy",
+        "Send",
+        "Receive",
+        "Convert",
+        "Rewards Income",
+        "CardSpend",
+        "CardBuyBack",
+        "Learning Reward",
+        "Sell",
+        "Advanced Trade Buy",
+    ];
 
     pub const INPUT_TRANSACTIONS: &[&str] = &[
         "Buy",
