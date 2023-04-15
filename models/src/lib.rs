@@ -15,6 +15,17 @@ pub mod coinbase {
     use rust_decimal::Decimal;
     use serde::{Deserialize, Serialize};
 
+    pub const INPUT_TRANSACTIONS: &[&str] = &[
+        "Buy",
+        "Receive",
+        "Rewards Income",
+        "CardBuyBack",
+        "Learning Reward",
+        "Advanced Trade Buy",
+    ];
+
+    pub const OUTPUT_TRANSACTIONS: &[&str] = &["Sell", "Send", "CardSpend"];
+
     pub const CSV_HEADERS: &[&str] = &[
         "Timestamp",
         "Transaction Type",

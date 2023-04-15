@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
-use models::{coinbase::CoinbaseTransactionRecord, InputTransactions};
 use models_db::CoinbaseTransaction;
 use rust_decimal::Decimal;
 
-pub use models::StakingRewards;
+pub use models::{
+    coinbase::{CoinbaseTransactionRecord, INPUT_TRANSACTIONS},
+    InputTransactions, StakingRewards,
+};
 
 pub struct CoinbaseParser<T> {
     data: Vec<T>,
@@ -108,20 +110,65 @@ impl StakingRewards for CoinbaseParser<CoinbaseTransaction> {
 }
 
 impl InputTransactions<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTransactionRecord> {
-    fn input_transactions(&self) -> Vec<&CoinbaseTransactionRecord> {
-        let input_transactions: &[&str] = &[
-            "Buy",
-            "Receive",
-            "Rewards Income",
-            "CardBuyBack",
-            "Learning Reward",
-            "Advanced Trade Buy",
-        ];
+    ///
+    /// Parses all transactions to match and return those that are known to be positive transactions into a wallet.
+    /// ```
+    /// # use rust_decimal::Decimal;
+    /// # use std::collections::HashMap;
+    /// # use chrono::{DateTime, Utc};
+    /// # use models::coinbase::CoinbaseTransactionRecord;
+    /// # use coinbase_transactions::{CoinbaseParser, InputTransactions};
+    /// let coinbase_parser = CoinbaseParser::new(
+    ///     vec![
+    ///         CoinbaseTransactionRecord {
+    ///             time_of_transaction: "2022-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///             transaction_type: "Buy".to_string(),
+    ///             asset: "DOT".to_string(),
+    ///             quantity_transacted: Decimal::new(22028, 6),
+    ///             spot_price_currency: "USD".to_string(),
+    ///             spot_price_at_transaction: Some(Decimal::new(800, 2)),
+    ///             subtotal: Some(Decimal::new(800, 2)),
+    ///             total: Some(Decimal::new(100, 0)),
+    ///             fees: None,
+    ///             notes: "Bought 0.022028 DOT for $100.00 USD".to_string(),
+    ///         },
+    ///         CoinbaseTransactionRecord {
+    ///             time_of_transaction: "2022-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///             transaction_type: "Sell".to_string(),
+    ///             asset: "DOT".to_string(),
+    ///             quantity_transacted: Decimal::new(22028, 6),
+    ///             spot_price_currency: "USD".to_string(),
+    ///             spot_price_at_transaction: Some(Decimal::new(800, 2)),
+    ///             subtotal: Some(Decimal::new(800, 2)),
+    ///             total: Some(Decimal::new(100, 0)),
+    ///             fees: None,
+    ///             notes: "Bought 0.022028 DOT for $100.00 USD".to_string(),
+    ///         },
+    ///     ]
+    /// );
+    ///
+    /// let expected = CoinbaseTransactionRecord {
+    ///     time_of_transaction: "2022-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///     transaction_type: "Buy".to_string(),
+    ///     asset: "DOT".to_string(),
+    ///     quantity_transacted: Decimal::new(22028, 6),
+    ///     spot_price_currency: "USD".to_string(),
+    ///     spot_price_at_transaction: Some(Decimal::new(800, 2)),
+    ///     subtotal: Some(Decimal::new(800, 2)),
+    ///     total: Some(Decimal::new(100, 0)),
+    ///     fees: None,
+    ///     notes: "Bought 0.022028 DOT for $100.00 USD".to_string(),
+    /// };
 
+    /// let input_transactions = coinbase_parser.input_transactions();
+    /// assert_eq!(input_transactions.len(), 1);
+    /// assert_eq!(input_transactions.first(), Some(&&expected));
+    /// ```
+    fn input_transactions(&self) -> Vec<&CoinbaseTransactionRecord> {
         self.data
             .iter()
             .filter(|transaction| {
-                input_transactions.iter().any(|received_transaction_type| {
+                INPUT_TRANSACTIONS.iter().any(|received_transaction_type| {
                     received_transaction_type.eq(&transaction.transaction_type)
                 })
             })
@@ -129,8 +176,75 @@ impl InputTransactions<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTra
     }
 }
 
-#[cfg(test)]
-mod input_transactions_for {}
+impl InputTransactions<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransaction> {
+    ///
+    /// Parses all transactions to match and return those that are known to be positive transactions into a wallet.
+    /// ```
+    /// # use rust_decimal::Decimal;
+    /// # use std::collections::HashMap;
+    /// # use chrono::{DateTime, Utc};
+    /// # use models_db::CoinbaseTransaction;
+    /// # use coinbase_transactions::{CoinbaseParser, InputTransactions};
+    /// let coinbase_parser = CoinbaseParser::new(
+    ///     vec![
+    ///         CoinbaseTransaction {
+    ///             id: 1022734,
+    ///             time_of_transaction: "2022-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///             transaction_type: "Buy".to_string(),
+    ///             asset: "DOT".to_string(),
+    ///             quantity_transacted: Decimal::new(22028, 6),
+    ///             spot_price_currency: "USD".to_string(),
+    ///             spot_price_at_transaction: Some(Decimal::new(800, 2)),
+    ///             subtotal: Some(Decimal::new(800, 2)),
+    ///             total: Some(Decimal::new(100, 0)),
+    ///             fees: None,
+    ///             notes: "Bought 0.022028 DOT for $100.00 USD".to_string(),
+    ///         },
+    ///         CoinbaseTransaction {
+    ///             id: 1022735,
+    ///             time_of_transaction: "2022-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///             transaction_type: "Sell".to_string(),
+    ///             asset: "DOT".to_string(),
+    ///             quantity_transacted: Decimal::new(22028, 6),
+    ///             spot_price_currency: "USD".to_string(),
+    ///             spot_price_at_transaction: Some(Decimal::new(800, 2)),
+    ///             subtotal: Some(Decimal::new(800, 2)),
+    ///             total: Some(Decimal::new(100, 0)),
+    ///             fees: None,
+    ///             notes: "Bought 0.022028 DOT for $100.00 USD".to_string(),
+    ///         },
+    ///     ]
+    /// );
+    ///
+    /// let expected = CoinbaseTransaction {
+    ///     id: 1022734,
+    ///     time_of_transaction: "2022-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///     transaction_type: "Buy".to_string(),
+    ///     asset: "DOT".to_string(),
+    ///     quantity_transacted: Decimal::new(22028, 6),
+    ///     spot_price_currency: "USD".to_string(),
+    ///     spot_price_at_transaction: Some(Decimal::new(800, 2)),
+    ///     subtotal: Some(Decimal::new(800, 2)),
+    ///     total: Some(Decimal::new(100, 0)),
+    ///     fees: None,
+    ///     notes: "Bought 0.022028 DOT for $100.00 USD".to_string(),
+    /// };
+
+    /// let input_transactions = coinbase_parser.input_transactions();
+    /// assert_eq!(input_transactions.len(), 1);
+    /// assert_eq!(input_transactions.first(), Some(&&expected));
+    /// ```
+    fn input_transactions(&self) -> Vec<&CoinbaseTransaction> {
+        self.data
+            .iter()
+            .filter(|transaction| {
+                INPUT_TRANSACTIONS.iter().any(|received_transaction_type| {
+                    received_transaction_type.eq(&transaction.transaction_type)
+                })
+            })
+            .collect()
+    }
+}
 
 #[cfg(test)]
 mod staking_reward_for {
@@ -357,12 +471,186 @@ mod staking_reward_for {
     }
 }
 
-pub mod transaction_parser {
+#[cfg(test)]
+mod input_transactions_for {
+    #[cfg(test)]
+    mod coinbase_transaction_record {
+        use chrono::{DateTime, Utc};
+        use models::{coinbase::CoinbaseTransactionRecord, InputTransactions};
+        use rust_decimal::Decimal;
 
+        use crate::CoinbaseParser;
+
+        #[test]
+        fn should_return_input_transactions_with_expected_content() {
+            let sample_vec = vec![
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Buy".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Receive".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec.clone());
+            let actual = coinbase_parser.input_transactions();
+
+            assert_eq!(actual.len(), 2);
+            assert_eq!(**actual.get(0).unwrap(), *sample_vec.get(0).unwrap());
+            assert_eq!(**actual.get(1).unwrap(), *sample_vec.get(1).unwrap());
+        }
+
+        #[test]
+        fn should_filter_out_non_input_transactions() {
+            let sample_vec = vec![
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Buy".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransactionRecord {
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Send".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec.clone());
+            let actual = coinbase_parser.input_transactions();
+
+            assert_eq!(actual.len(), 1);
+            assert_eq!(**actual.get(0).unwrap(), *sample_vec.get(0).unwrap());
+        }
+    }
+
+    #[cfg(test)]
+    mod coinbase_transaction {
+        use chrono::{DateTime, Utc};
+        use models::InputTransactions;
+        use models_db::CoinbaseTransaction;
+        use rust_decimal::Decimal;
+
+        use crate::CoinbaseParser;
+
+        #[test]
+        fn should_return_input_transactions_with_expected_content() {
+            let sample_vec = vec![
+                CoinbaseTransaction {
+                    id: 32313,
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Buy".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransaction {
+                    id: 32313,
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Receive".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec.clone());
+            let actual = coinbase_parser.input_transactions();
+
+            assert_eq!(actual.len(), 2);
+            assert_eq!(**actual.get(0).unwrap(), *sample_vec.get(0).unwrap());
+            assert_eq!(**actual.get(1).unwrap(), *sample_vec.get(1).unwrap());
+        }
+
+        #[test]
+        fn should_filter_out_non_input_transactions() {
+            let sample_vec = vec![
+                CoinbaseTransaction {
+                    id: 102224,
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Buy".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+                CoinbaseTransaction {
+                    id: 3773,
+                    time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
+                    transaction_type: "Send".to_string(),
+                    asset: "DOT".to_string(),
+                    quantity_transacted: Decimal::new(2200024, 5),
+                    spot_price_currency: "USD".to_string(),
+                    spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+                    subtotal: Some(Decimal::new(9701, 2)),
+                    total: Some(Decimal::new(100, 0)),
+                    fees: Some(Decimal::new(299, 2)),
+                    notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+                },
+            ];
+
+            let coinbase_parser = CoinbaseParser::new(sample_vec.clone());
+            let actual = coinbase_parser.input_transactions();
+
+            assert_eq!(actual.len(), 1);
+            assert_eq!(**actual.get(0).unwrap(), *sample_vec.get(0).unwrap());
+        }
+    }
+}
+
+pub mod transaction_parser {
     extern crate models;
     extern crate rust_decimal;
 
     use std::{collections::HashMap, str::FromStr};
+
+    use models::coinbase::INPUT_TRANSACTIONS;
+    use models::coinbase::OUTPUT_TRANSACTIONS;
 
     pub use self::models::coinbase::CoinbaseTransactionRecord;
     pub use self::models::coinbase::CSV_HEADERS;
@@ -380,26 +668,6 @@ pub mod transaction_parser {
         "Sell",
         "Advanced Trade Buy",
     ];
-
-    const INPUT_TRANSACTIONS: &[&str] = &[
-        "Buy",
-        "Receive",
-        "Rewards Income",
-        "CardBuyBack",
-        "Learning Reward",
-        "Advanced Trade Buy",
-    ];
-    const OUTPUT_TRANSACTIONS: &[&str] = &["Sell", "Send", "CardSpend"];
-
-    pub fn get_input_transactions<'a>(
-        transactions: impl Iterator<Item = &'a CoinbaseTransactionRecord>,
-    ) -> impl Iterator<Item = &'a CoinbaseTransactionRecord> {
-        transactions.filter(|transaction| {
-            INPUT_TRANSACTIONS.iter().any(|received_transaction_type| {
-                received_transaction_type.eq(&transaction.transaction_type)
-            })
-        })
-    }
 
     pub fn get_book_of_record<'a>(
         transactions: impl Iterator<Item = &'a CoinbaseTransactionRecord>,
@@ -465,95 +733,6 @@ pub mod transaction_parser {
         OUTPUT_TRANSACTIONS
             .iter()
             .any(|send_transaction| send_transaction.eq(&transaction.transaction_type))
-    }
-}
-
-#[cfg(test)]
-mod test {
-    extern crate chrono;
-    extern crate models;
-    extern crate rand;
-    extern crate rust_decimal;
-
-    use self::models::coinbase::CoinbaseTransactionRecord;
-
-    use super::transaction_parser::*;
-
-    use self::rust_decimal::Decimal;
-
-    use self::chrono::prelude::*;
-
-    #[test]
-    fn should_return_input_transactions_with_expected_content() {
-        let sample_vec = vec![
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Buy".to_string(),
-                asset: "DOT".to_string(),
-                quantity_transacted: Decimal::new(2200024, 5),
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Receive".to_string(),
-                asset: "DOT".to_string(),
-                quantity_transacted: Decimal::new(2200024, 5),
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-        ];
-
-        let actual: Vec<&CoinbaseTransactionRecord> =
-            get_input_transactions(sample_vec.iter()).collect();
-
-        assert_eq!(actual.len(), 2);
-        assert_eq!(**actual.get(0).unwrap(), *sample_vec.get(0).unwrap());
-        assert_eq!(**actual.get(1).unwrap(), *sample_vec.get(1).unwrap());
-    }
-
-    #[test]
-    fn should_filter_out_non_input_transactions() {
-        let sample_vec = vec![
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Buy".to_string(),
-                asset: "DOT".to_string(),
-                quantity_transacted: Decimal::new(2200024, 5),
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-            CoinbaseTransactionRecord {
-                time_of_transaction: "2021-04-01T21:38:02Z".parse::<DateTime<Utc>>().unwrap(),
-                transaction_type: "Send".to_string(),
-                asset: "DOT".to_string(),
-                quantity_transacted: Decimal::new(2200024, 5),
-                spot_price_currency: "USD".to_string(),
-                spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-                subtotal: Some(Decimal::new(9701, 2)),
-                total: Some(Decimal::new(100, 0)),
-                fees: Some(Decimal::new(299, 2)),
-                notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-            },
-        ];
-
-        let actual: Vec<&CoinbaseTransactionRecord> =
-            get_input_transactions(sample_vec.iter()).collect();
-
-        assert_eq!(actual.len(), 1);
-        assert_eq!(**actual.get(0).unwrap(), *sample_vec.get(0).unwrap());
     }
 }
 
