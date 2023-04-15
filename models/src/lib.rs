@@ -1,7 +1,47 @@
+use rust_decimal::Decimal;
+use std::collections::HashMap;
+
+// TODO: This is not the right place for this trait.
+pub trait StakingRewards {
+    fn staking_rewards(&self) -> HashMap<String, Decimal>;
+}
+
+pub trait InputTransactions<T> {
+    fn input_transactions(&self) -> Vec<&T>;
+}
+
+pub trait ActiveAssetValues {
+    fn active_assets(&self) -> HashMap<String, Decimal>;
+}
+
 pub mod coinbase {
     pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
     use serde::{Deserialize, Serialize};
+
+    pub const INCLUDE_TRANSACTIONS: &[&str] = &[
+        "Buy",
+        "Send",
+        "Receive",
+        "Convert",
+        "Rewards Income",
+        "CardSpend",
+        "CardBuyBack",
+        "Learning Reward",
+        "Sell",
+        "Advanced Trade Buy",
+    ];
+
+    pub const INPUT_TRANSACTIONS: &[&str] = &[
+        "Buy",
+        "Receive",
+        "Rewards Income",
+        "CardBuyBack",
+        "Learning Reward",
+        "Advanced Trade Buy",
+    ];
+
+    pub const OUTPUT_TRANSACTIONS: &[&str] = &["Sell", "Send", "CardSpend"];
 
     pub const CSV_HEADERS: &[&str] = &[
         "Timestamp",
