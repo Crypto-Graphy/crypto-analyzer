@@ -5,7 +5,8 @@ use rust_decimal::Decimal;
 
 pub use models::{
     coinbase::{
-        CoinbaseTransactionRecord, INCLUDE_TRANSACTIONS, INPUT_TRANSACTIONS, OUTPUT_TRANSACTIONS,
+        CoinbaseTransactionRecord, CSV_HEADERS, INCLUDE_TRANSACTIONS, INPUT_TRANSACTIONS,
+        OUTPUT_TRANSACTIONS,
     },
     ActiveAssetValues, InputTransactions, StakingRewards,
 };

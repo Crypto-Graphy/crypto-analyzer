@@ -1,4 +1,4 @@
-use coinbase_transactions::transaction_parser::{CoinbaseTransactionRecord, CSV_HEADERS};
+use coinbase_transactions::{CoinbaseTransactionRecord, CSV_HEADERS};
 use csv_parser::{Csv, CsvIdentifier, CsvParser};
 use kraken_ledgers::ledger_parser::{KrakenLedgerRecord, CSV_HEADERS as KRAKEN_HEADERS};
 use serde::Serialize;

@@ -100,7 +100,7 @@ mod parse_csver_should {
     extern crate rust_decimal;
     use std::{str::FromStr, vec};
 
-    use coinbase_transactions::transaction_parser::CoinbaseTransactionRecord;
+    use coinbase_transactions::CoinbaseTransactionRecord;
     use kraken_ledgers::ledger_parser::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT};
 
     use axum::{http::StatusCode, Json};
