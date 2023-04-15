@@ -11,40 +11,6 @@ pub use models::{
     ActiveAssetValues, InputTransactions, StakingRewards,
 };
 
-fn process_transaction(map: &mut HashMap<String, Decimal>, asset: &String, amount: &Decimal) {
-    if let Some(value) = map.get(asset) {
-        Decimal::from_str(&value.to_string()).unwrap();
-        map.insert(asset.to_string(), value + *amount);
-    } else {
-        map.insert(asset.to_string(), *amount);
-    }
-}
-
-fn is_gain_record(transaction: &CoinbaseTransactionRecord) -> bool {
-    INPUT_TRANSACTIONS
-        .iter()
-        .any(|receive_type| receive_type.eq(&transaction.transaction_type))
-}
-
-fn is_loss_record(transaction: &CoinbaseTransactionRecord) -> bool {
-    OUTPUT_TRANSACTIONS
-        .iter()
-        .any(|send_transaction| send_transaction.eq(&transaction.transaction_type))
-}
-
-// TODO: Combined these together?
-fn is_gain(transaction: &CoinbaseTransaction) -> bool {
-    INPUT_TRANSACTIONS
-        .iter()
-        .any(|receive_type| receive_type.eq(&transaction.transaction_type))
-}
-
-fn is_loss(transaction: &CoinbaseTransaction) -> bool {
-    OUTPUT_TRANSACTIONS
-        .iter()
-        .any(|send_transaction| send_transaction.eq(&transaction.transaction_type))
-}
-
 pub struct CoinbaseParser<T> {
     data: Vec<T>,
 }
@@ -71,52 +37,6 @@ impl StakingRewards for CoinbaseParser<CoinbaseTransactionRecord> {
     /// let coinbase_parser = CoinbaseParser::new(
     ///     vec![
     ///         CoinbaseTransactionRecord {
-    ///             time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
-    ///             transaction_type: "Rewards Income".to_string(),
-    ///             asset: "DOT".to_string(),
-    ///             quantity_transacted: Decimal::new(22028, 6),
-    ///             spot_price_currency: "USD".to_string(),
-    ///             spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
-    ///             subtotal: Some(Decimal::new(9701, 2)),
-    ///             total: Some(Decimal::new(100, 0)),
-    ///             fees: None,
-    ///             notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
-    ///         },
-    ///     ]
-    /// );
-    /// let rewards = coinbase_parser.staking_rewards();
-    /// let expected = Decimal::new(22028, 6);
-    /// assert_eq!(rewards.get("DOT"), Some(&expected));
-    /// ```
-    fn staking_rewards(&self) -> HashMap<String, Decimal> {
-        self.data
-            .iter()
-            .filter(|transaction| transaction.transaction_type.eq("Rewards Income"))
-            .fold(HashMap::new(), |mut reward_map, record| {
-                if let Some(value) = reward_map.get(&record.asset) {
-                    reward_map.insert(record.asset.to_string(), value + record.quantity_transacted);
-                } else {
-                    reward_map.insert(record.asset.to_string(), record.quantity_transacted);
-                }
-
-                reward_map
-            })
-    }
-}
-
-impl StakingRewards for CoinbaseParser<CoinbaseTransaction> {
-    ///
-    /// Generates rewards based on the vector of CoinbaseTransaction contained within the struct.
-    /// ```
-    /// # use rust_decimal::Decimal;
-    /// # use std::collections::HashMap;
-    /// # use chrono::{DateTime, Utc};
-    /// # use models_db::CoinbaseTransaction;
-    /// # use coinbase_transactions::{CoinbaseParser, StakingRewards};
-    /// let coinbase_parser = CoinbaseParser::new(
-    ///     vec![
-    ///         CoinbaseTransaction {
-    ///             id: 3,
     ///             time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
     ///             transaction_type: "Rewards Income".to_string(),
     ///             asset: "DOT".to_string(),
@@ -217,6 +137,98 @@ impl InputTransactions<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTra
     }
 }
 
+impl ActiveAssetValues for CoinbaseParser<CoinbaseTransactionRecord> {
+    fn active_assets(&self) -> HashMap<String, Decimal> {
+        self.data
+            .iter()
+            .filter(|transaction| {
+                INCLUDE_TRANSACTIONS.iter().any(|included_transaction| {
+                    included_transaction.eq(&transaction.transaction_type)
+                })
+            })
+            .fold(HashMap::new(), |mut map, transaction| {
+                if is_gain_record(transaction) {
+                    process_transaction(
+                        &mut map,
+                        &transaction.asset,
+                        &transaction.quantity_transacted,
+                    );
+                } else if is_loss_record(transaction) {
+                    process_transaction(
+                        &mut map,
+                        &transaction.asset,
+                        &(transaction.quantity_transacted * Decimal::new(-1, 0)),
+                    );
+                } else if transaction.transaction_type.eq("Convert") {
+                    if let Some(value) = transaction.notes.split("to").last() {
+                        let vec: Vec<&str> = value.trim().split(' ').collect();
+
+                        let amount =
+                            Decimal::from_str(&vec.first().unwrap().trim().replace(',', ""))
+                                .unwrap();
+                        let asset = vec.last().unwrap().to_string();
+
+                        process_transaction(
+                            &mut map,
+                            &transaction.asset,
+                            &(transaction.quantity_transacted * Decimal::new(-1, 0)),
+                        );
+
+                        process_transaction(&mut map, &asset, &amount);
+                    }
+                };
+
+                map
+            })
+    }
+}
+
+impl StakingRewards for CoinbaseParser<CoinbaseTransaction> {
+    ///
+    /// Generates rewards based on the vector of CoinbaseTransaction contained within the struct.
+    /// ```
+    /// # use rust_decimal::Decimal;
+    /// # use std::collections::HashMap;
+    /// # use chrono::{DateTime, Utc};
+    /// # use models_db::CoinbaseTransaction;
+    /// # use coinbase_transactions::{CoinbaseParser, StakingRewards};
+    /// let coinbase_parser = CoinbaseParser::new(
+    ///     vec![
+    ///         CoinbaseTransaction {
+    ///             id: 3,
+    ///             time_of_transaction: "2021-04-01T21:38:01Z".parse::<DateTime<Utc>>().unwrap(),
+    ///             transaction_type: "Rewards Income".to_string(),
+    ///             asset: "DOT".to_string(),
+    ///             quantity_transacted: Decimal::new(22028, 6),
+    ///             spot_price_currency: "USD".to_string(),
+    ///             spot_price_at_transaction: Some(Decimal::new(5894398, 2)),
+    ///             subtotal: Some(Decimal::new(9701, 2)),
+    ///             total: Some(Decimal::new(100, 0)),
+    ///             fees: None,
+    ///             notes: "Bought 0.0016458 BTC for $100.00 USD".to_string(),
+    ///         },
+    ///     ]
+    /// );
+    /// let rewards = coinbase_parser.staking_rewards();
+    /// let expected = Decimal::new(22028, 6);
+    /// assert_eq!(rewards.get("DOT"), Some(&expected));
+    /// ```
+    fn staking_rewards(&self) -> HashMap<String, Decimal> {
+        self.data
+            .iter()
+            .filter(|transaction| transaction.transaction_type.eq("Rewards Income"))
+            .fold(HashMap::new(), |mut reward_map, record| {
+                if let Some(value) = reward_map.get(&record.asset) {
+                    reward_map.insert(record.asset.to_string(), value + record.quantity_transacted);
+                } else {
+                    reward_map.insert(record.asset.to_string(), record.quantity_transacted);
+                }
+
+                reward_map
+            })
+    }
+}
+
 impl InputTransactions<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransaction> {
     ///
     /// Parses all transactions to match and return those that are known to be positive transactions into a wallet.
@@ -287,52 +299,6 @@ impl InputTransactions<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransacti
     }
 }
 
-impl ActiveAssetValues for CoinbaseParser<CoinbaseTransactionRecord> {
-    fn active_assets(&self) -> HashMap<String, Decimal> {
-        self.data
-            .iter()
-            .filter(|transaction| {
-                INCLUDE_TRANSACTIONS.iter().any(|included_transaction| {
-                    included_transaction.eq(&transaction.transaction_type)
-                })
-            })
-            .fold(HashMap::new(), |mut map, transaction| {
-                if is_gain_record(transaction) {
-                    process_transaction(
-                        &mut map,
-                        &transaction.asset,
-                        &transaction.quantity_transacted,
-                    );
-                } else if is_loss_record(transaction) {
-                    process_transaction(
-                        &mut map,
-                        &transaction.asset,
-                        &(transaction.quantity_transacted * Decimal::new(-1, 0)),
-                    );
-                } else if transaction.transaction_type.eq("Convert") {
-                    if let Some(value) = transaction.notes.split("to").last() {
-                        let vec: Vec<&str> = value.trim().split(' ').collect();
-
-                        let amount =
-                            Decimal::from_str(&vec.first().unwrap().trim().replace(',', ""))
-                                .unwrap();
-                        let asset = vec.last().unwrap().to_string();
-
-                        process_transaction(
-                            &mut map,
-                            &transaction.asset,
-                            &(transaction.quantity_transacted * Decimal::new(-1, 0)),
-                        );
-
-                        process_transaction(&mut map, &asset, &amount);
-                    }
-                };
-
-                map
-            })
-    }
-}
-
 impl ActiveAssetValues for CoinbaseParser<CoinbaseTransaction> {
     fn active_assets(&self) -> HashMap<String, Decimal> {
         self.data
@@ -378,6 +344,41 @@ impl ActiveAssetValues for CoinbaseParser<CoinbaseTransaction> {
             })
     }
 }
+
+fn process_transaction(map: &mut HashMap<String, Decimal>, asset: &String, amount: &Decimal) {
+    if let Some(value) = map.get(asset) {
+        Decimal::from_str(&value.to_string()).unwrap();
+        map.insert(asset.to_string(), value + *amount);
+    } else {
+        map.insert(asset.to_string(), *amount);
+    }
+}
+
+fn is_gain_record(transaction: &CoinbaseTransactionRecord) -> bool {
+    INPUT_TRANSACTIONS
+        .iter()
+        .any(|receive_type| receive_type.eq(&transaction.transaction_type))
+}
+
+fn is_loss_record(transaction: &CoinbaseTransactionRecord) -> bool {
+    OUTPUT_TRANSACTIONS
+        .iter()
+        .any(|send_transaction| send_transaction.eq(&transaction.transaction_type))
+}
+
+// TODO: Combined these together?
+fn is_gain(transaction: &CoinbaseTransaction) -> bool {
+    INPUT_TRANSACTIONS
+        .iter()
+        .any(|receive_type| receive_type.eq(&transaction.transaction_type))
+}
+
+fn is_loss(transaction: &CoinbaseTransaction) -> bool {
+    OUTPUT_TRANSACTIONS
+        .iter()
+        .any(|send_transaction| send_transaction.eq(&transaction.transaction_type))
+}
+
 #[cfg(test)]
 mod staking_reward_for {
     mod coinbase_transaction_record {
