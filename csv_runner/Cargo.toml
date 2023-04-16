@@ -6,6 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-coinbase_transactions = { path = "../coinbase_transactions" }
+coinbase_parser = { path = "../coinbase_parser" }
 csv_parser = { path = "../csv_parser" }
 crypto_database = { path = "../crypto_database" }
