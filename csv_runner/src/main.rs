@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use coinbase_transactions::CoinbaseTransactionRecord;
+use coinbase_parser::CoinbaseTransactionRecord;
 use crypto_database::coinbase_db::NewCoinbaseTransaction;
 use csv_parser::{Csv, CsvParser};
 

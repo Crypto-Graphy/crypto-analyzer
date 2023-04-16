@@ -2,7 +2,7 @@ extern crate coinbase_transactions;
 extern crate kraken_ledgers;
 extern crate rust_decimal;
 
-use coinbase_transactions::transaction_parser::CoinbaseTransactionRecord;
+use coinbase_parser::transaction_parser::CoinbaseTransactionRecord;
 use kraken_ledgers::ledger_parser::KrakenLedgerRecord;
 
 use self::rust_decimal::Decimal;
@@ -27,10 +27,8 @@ impl From<CoinbaseTransactionRecord> for PriceTransaction {
     /// Converts a CoinbaseTransactionRecord into a PriceTransaction.
     ///
     /// ```
-    /// # extern crate rust_decimal;
-    /// # extern crate coinbase_transactions;
     ///
-    /// # use coinbase_transactions::transaction_parser::CoinbaseTransactionRecord;
+    /// # use coinbase_parser::transaction_parser::CoinbaseTransactionRecord;
     /// # use universal_transaction::PriceTransaction;
     /// # use universal_transaction::TransactionSource;
     /// # use rust_decimal::Decimal;

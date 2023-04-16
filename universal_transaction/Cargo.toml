@@ -5,5 +5,5 @@ authors=["1x2kb 1x2kb@github.com"]
 
 [dependencies]
 rust_decimal.workspace = true
-kraken_ledgers = {path = "../kraken_ledgers"}
-coinbase_transactions = {path = "../coinbase_transactions"}
+kraken_ledgers = { path = "../kraken_ledgers" }
+coinbase_parser = { path = "../coinbase_parser" }

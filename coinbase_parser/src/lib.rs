@@ -33,7 +33,7 @@ impl StakingRewards for CoinbaseParser<CoinbaseTransactionRecord> {
     /// # use std::collections::HashMap;
     /// # use chrono::{DateTime, Utc};
     /// # use models::coinbase::CoinbaseTransactionRecord;
-    /// # use coinbase_transactions::{CoinbaseParser, StakingRewards};
+    /// # use coinbase_parser::{CoinbaseParser, StakingRewards};
     /// let coinbase_parser = CoinbaseParser::new(
     ///     vec![
     ///         CoinbaseTransactionRecord {
@@ -78,7 +78,7 @@ impl InputTransactions<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTra
     /// # use std::collections::HashMap;
     /// # use chrono::{DateTime, Utc};
     /// # use models::coinbase::CoinbaseTransactionRecord;
-    /// # use coinbase_transactions::{CoinbaseParser, InputTransactions};
+    /// # use coinbase_parser::{CoinbaseParser, InputTransactions};
     /// let coinbase_parser = CoinbaseParser::new(
     ///     vec![
     ///         CoinbaseTransactionRecord {
@@ -191,7 +191,7 @@ impl StakingRewards for CoinbaseParser<CoinbaseTransaction> {
     /// # use std::collections::HashMap;
     /// # use chrono::{DateTime, Utc};
     /// # use models_db::CoinbaseTransaction;
-    /// # use coinbase_transactions::{CoinbaseParser, StakingRewards};
+    /// # use coinbase_parser::{CoinbaseParser, StakingRewards};
     /// let coinbase_parser = CoinbaseParser::new(
     ///     vec![
     ///         CoinbaseTransaction {
@@ -237,7 +237,7 @@ impl InputTransactions<CoinbaseTransaction> for CoinbaseParser<CoinbaseTransacti
     /// # use std::collections::HashMap;
     /// # use chrono::{DateTime, Utc};
     /// # use models_db::CoinbaseTransaction;
-    /// # use coinbase_transactions::{CoinbaseParser, InputTransactions};
+    /// # use coinbase_parser::{CoinbaseParser, InputTransactions};
     /// let coinbase_parser = CoinbaseParser::new(
     ///     vec![
     ///         CoinbaseTransaction {

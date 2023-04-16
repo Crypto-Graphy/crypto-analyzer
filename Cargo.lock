@@ -280,7 +280,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "coinbase_transactions"
+name = "coinbase_parser"
 version = "0.1.0"
 dependencies = [
  "chrono",
@@ -308,7 +308,7 @@ dependencies = [
  "axum",
  "chrono",
  "coinbase_actions",
- "coinbase_transactions",
+ "coinbase_parser",
  "crypto_database",
  "kraken_ledgers",
  "parse_csv",
@@ -369,7 +369,7 @@ dependencies = [
 name = "csv_runner"
 version = "0.1.0"
 dependencies = [
- "coinbase_transactions",
+ "coinbase_parser",
  "crypto_database",
  "csv_parser",
 ]
@@ -918,7 +918,7 @@ name = "parse_csv"
 version = "0.1.0"
 dependencies = [
  "axum",
- "coinbase_transactions",
+ "coinbase_parser",
  "csv_parser",
  "kraken_ledgers",
  "serde",
