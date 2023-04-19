@@ -6,6 +6,10 @@ pub trait StakingRewards {
     fn staking_rewards(&self) -> HashMap<String, Decimal>;
 }
 
+pub trait InputTransaction {
+    fn is_input_transaction(&self) -> bool;
+}
+
 pub trait InputTransactions<T> {
     fn input_transactions(&self) -> Vec<&T>;
 }
@@ -14,10 +18,16 @@ pub trait ActiveAssetValues {
     fn active_assets(&self) -> HashMap<String, Decimal>;
 }
 
+pub trait RecordsByAsset<T> {
+    fn by_asset(&self) -> HashMap<String, Vec<&T>>;
+}
+
 pub mod coinbase {
     pub use chrono::{DateTime, Utc};
     use rust_decimal::Decimal;
     use serde::{Deserialize, Serialize};
+
+    use crate::InputTransaction;
 
     pub const INCLUDE_TRANSACTIONS: &[&str] = &[
         "Buy",
@@ -85,6 +95,12 @@ pub mod coinbase {
         #[serde(rename(serialize = "notes", deserialize = "Notes"))]
         pub notes: String,
     }
+
+    impl InputTransaction for CoinbaseTransactionRecord {
+        fn is_input_transaction(&self) -> bool {
+            todo!()
+        }
+    }
 }
 
 pub mod kraken {
@@ -98,7 +114,7 @@ pub mod kraken {
         "txid", "refid", "time", "type", "subtype", "aclass", "asset", "amount", "fee", "balance",
     ];
 
-    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
     #[serde(rename_all(serialize = "camelCase"))]
     pub struct KrakenLedgerRecord {
         pub txid: Option<String>,
