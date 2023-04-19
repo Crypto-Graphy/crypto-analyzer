@@ -4,7 +4,7 @@ pub use models::{
     kraken::{KrakenLedgerRecord, CSV_HEADERS, DATE_FORMAT},
     StakingRewards,
 };
-use models::{ActiveAssetValues, InputTransactions, RecordsByAsset};
+use models::{ActiveAssetValues, InputTransaction, InputTransactions, RecordsByAsset};
 pub use rust_decimal::Decimal;
 
 pub struct KrakenParser<T> {
@@ -35,6 +35,57 @@ impl StakingRewards for KrakenParser<KrakenLedgerRecord> {
 }
 
 impl ActiveAssetValues for KrakenParser<KrakenLedgerRecord> {
+    /// Retieve the active asset status for all assets. This calculates the current number of assets considering all input and output transactions
+    /// ```
+    /// # use chrono::{TimeZone, Utc};
+    /// # use models::{
+    /// #   kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
+    /// #   ActiveAssetValues,
+    /// # };
+    /// # use rust_decimal::prelude::{Decimal, Zero};
+    /// # use kraken_ledgers::KrakenParser;
+    /// #
+    /// let sample_ledger_1 = KrakenLedgerRecord {
+    ///     txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+    ///     refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///     time: Utc
+    ///         .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///         .unwrap(),
+    ///     record_type: "staking".to_string(),
+    ///     subtype: None,
+    ///     a_class: "currency".to_string(),
+    ///     asset: "DOT".to_string(),
+    ///     amount: Decimal::new(51002, 4),
+    ///     fee: Decimal::zero(),
+    ///     balance: Some(Decimal::new(5, 0)),
+    /// };
+    ///
+    /// let sample_ledger_2 = KrakenLedgerRecord {
+    ///     txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+    ///     refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///     time: Utc
+    ///         .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///         .unwrap(),
+    ///     record_type: "staking".to_string(),
+    ///     subtype: None,
+    ///     a_class: "currency".to_string(),
+    ///     asset: "DOT".to_string(),
+    ///     amount: Decimal::new(5, 0),
+    ///     fee: Decimal::zero(),
+    ///     balance: Some(Decimal::new(5, 0)),
+    /// };
+    ///
+    /// let sample_vec = vec![sample_ledger_1, sample_ledger_2];
+    /// let expected_sum = Decimal::new(51002, 4) + Decimal::new(5, 0);
+    ///
+    /// let kraken_parser = KrakenParser::new(sample_vec);
+    /// let active_assets = kraken_parser.active_assets();
+    /// assert!(
+    ///     active_assets.contains_key("DOT"),
+    ///     "book did not contain DOT"
+    /// );
+    /// assert_eq!(*active_assets.get("DOT").unwrap(), expected_sum);
+    /// ```
     fn active_assets(&self) -> HashMap<String, Decimal> {
         self.data
             .iter()
@@ -68,7 +119,10 @@ impl RecordsByAsset<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
 
 impl InputTransactions<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
     fn input_transactions(&self) -> Vec<&KrakenLedgerRecord> {
-        todo!()
+        self.data
+            .iter()
+            .filter(|record| record.is_input_transaction())
+            .collect()
     }
 }
 
@@ -299,6 +353,107 @@ mod active_asset_values_for {
             let active_assets = kraken_parser.active_assets();
 
             assert!(active_assets.is_empty(), "book was not empty");
+        }
+    }
+}
+
+#[cfg(test)]
+mod records_by_asset_for {
+    #[cfg(test)]
+    mod kraken_ledger_record {
+        use chrono::{TimeZone, Utc};
+        use models::{
+            kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
+            RecordsByAsset,
+        };
+        use rust_decimal::{prelude::Zero, Decimal};
+
+        use crate::KrakenParser;
+
+        #[test]
+        fn should_store_multiple() {
+            let sample_ledger_1 = KrakenLedgerRecord {
+                txid: Some("321LII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "staking".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "DOT".to_string(),
+                amount: Decimal::new(51002, 4),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            let sample_ledger_2 = KrakenLedgerRecord {
+                txid: Some("012OJA-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "staking".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "DOT".to_string(),
+                amount: Decimal::new(5, 0),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            let sample_vec = vec![sample_ledger_1, sample_ledger_2];
+
+            let kraken_parser = KrakenParser::new(sample_vec.clone());
+            let map = kraken_parser.by_asset();
+
+            assert_eq!(map.keys().len(), 1);
+            assert_eq!(map.get("DOT").unwrap().len(), 2);
+            assert_eq!(
+                **map.get("DOT").unwrap().iter().nth(0).unwrap(),
+                *sample_vec.get(0).unwrap()
+            );
+            assert_eq!(
+                **map.get("DOT").unwrap().iter().nth(1).unwrap(),
+                *sample_vec.get(1).unwrap()
+            );
+        }
+
+        #[test]
+        fn should_store_a_single_asset() {
+            let sample_vec = vec![KrakenLedgerRecord {
+                txid: Some("321LII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "staking".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "ADA".to_string(),
+                amount: Decimal::new(51002, 4),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            }];
+
+            let kraken_parser = KrakenParser::new(sample_vec.clone());
+            let asset_map = kraken_parser.by_asset();
+
+            assert_eq!(asset_map.keys().len(), 1);
+            assert_eq!(asset_map.get("ADA").unwrap().len(), 1);
+            assert_eq!(
+                **asset_map.get("ADA").unwrap().iter().nth(0).unwrap(),
+                *sample_vec.get(0).unwrap()
+            );
+        }
+
+        #[test]
+        fn should_not_contain_non_existent_keys() {
+            let kraken_parser: KrakenParser<KrakenLedgerRecord> = KrakenParser::new(Vec::new());
+            let map = kraken_parser.by_asset();
+
+            assert_eq!(map.len(), 0);
+            assert_eq!(map.get("DOT"), None);
         }
     }
 }
