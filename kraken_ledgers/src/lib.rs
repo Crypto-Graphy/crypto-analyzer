@@ -410,7 +410,7 @@ mod records_by_asset_for {
             assert_eq!(map.keys().len(), 1);
             assert_eq!(map.get("DOT").unwrap().len(), 2);
             assert_eq!(
-                **map.get("DOT").unwrap().iter().nth(0).unwrap(),
+                **map.get("DOT").unwrap().iter().next().unwrap(),
                 *sample_vec.get(0).unwrap()
             );
             assert_eq!(
@@ -442,7 +442,7 @@ mod records_by_asset_for {
             assert_eq!(asset_map.keys().len(), 1);
             assert_eq!(asset_map.get("ADA").unwrap().len(), 1);
             assert_eq!(
-                **asset_map.get("ADA").unwrap().iter().nth(0).unwrap(),
+                **asset_map.get("ADA").unwrap().iter().next().unwrap(),
                 *sample_vec.get(0).unwrap()
             );
         }
