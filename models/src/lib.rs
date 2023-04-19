@@ -98,7 +98,9 @@ pub mod coinbase {
 
     impl InputTransaction for CoinbaseTransactionRecord {
         fn is_input_transaction(&self) -> bool {
-            todo!()
+            INPUT_TRANSACTIONS.iter().any(|received_transaction_type| {
+                received_transaction_type.eq(&self.transaction_type)
+            })
         }
     }
 }
@@ -107,8 +109,10 @@ pub mod kraken {
     pub const DATE_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
     use chrono::TimeZone;
     pub use chrono::{DateTime, Utc};
-    use rust_decimal::Decimal;
+    use rust_decimal::{prelude::Zero, Decimal};
     use serde::{Deserialize, Deserializer, Serialize};
+
+    use crate::InputTransaction;
 
     pub const CSV_HEADERS: &[&str] = &[
         "txid", "refid", "time", "type", "subtype", "aclass", "asset", "amount", "fee", "balance",
@@ -133,6 +137,12 @@ pub mod kraken {
         pub fee: Decimal,
         #[serde(with = "rust_decimal::serde::str_option")]
         pub balance: Option<Decimal>,
+    }
+
+    impl InputTransaction for KrakenLedgerRecord {
+        fn is_input_transaction(&self) -> bool {
+            self.amount >= Decimal::zero()
+        }
     }
 
     fn parse_date_time<'de, D: Deserializer<'de>>(d: D) -> Result<DateTime<Utc>, D::Error> {

@@ -66,6 +66,12 @@ impl RecordsByAsset<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
     }
 }
 
+impl InputTransactions<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
+    fn input_transactions(&self) -> Vec<&KrakenLedgerRecord> {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 mod staking_rewards_for {
     #[cfg(test)]
