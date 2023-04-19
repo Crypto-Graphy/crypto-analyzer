@@ -3,6 +3,7 @@ pub mod schema;
 use crate::schema::coinbase_transactions;
 use chrono::prelude::*;
 use diesel::prelude::*;
+use models::{coinbase::INPUT_TRANSACTIONS, InputTransaction};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
@@ -20,6 +21,14 @@ pub struct CoinbaseTransaction {
     pub total: Option<Decimal>,
     pub fees: Option<Decimal>,
     pub notes: String,
+}
+
+impl InputTransaction for CoinbaseTransaction {
+    fn is_input_transaction(&self) -> bool {
+        INPUT_TRANSACTIONS
+            .iter()
+            .any(|received_transaction_type| received_transaction_type.eq(&self.transaction_type))
+    }
 }
 
 #[derive(Insertable, Deserialize, PartialEq, Eq, Clone)]
