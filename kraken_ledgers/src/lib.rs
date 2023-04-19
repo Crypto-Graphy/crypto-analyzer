@@ -18,6 +18,58 @@ impl<T> KrakenParser<T> {
 }
 
 impl StakingRewards for KrakenParser<KrakenLedgerRecord> {
+    ///
+    /// ```
+    /// use chrono::{TimeZone, Utc};
+    ///    use models::{
+    ///        kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
+    ///        StakingRewards,
+    ///    };
+    ///    use rust_decimal::prelude::{Decimal, Zero};
+    ///
+    ///    use kraken_ledgers::KrakenParser;
+    ///
+    ///
+    ///         let sample_ledger_1 = KrakenLedgerRecord {
+    ///            txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+    ///            refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///            time: Utc
+    ///                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///                .unwrap(),
+    ///            record_type: "staking".to_string(),
+    ///            subtype: None,
+    ///            a_class: "currency".to_string(),
+    ///            asset: "DOT".to_string(),
+    ///            amount: Decimal::new(51002, 4),
+    ///            fee: Decimal::zero(),
+    ///            balance: Some(Decimal::new(5, 0)),
+    ///        };
+
+    ///        let sample_ledger_2 = KrakenLedgerRecord {
+    ///            txid: Some("899OJA-OFGWB-JTUO7J".to_string()),
+    ///            refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///            time: Utc
+    ///                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///                .unwrap(),
+    ///            record_type: "staking".to_string(),
+    ///            subtype: None,
+    ///            a_class: "currency".to_string(),
+    ///            asset: "ADA".to_string(),
+    ///            amount: Decimal::new(5, 0),
+    ///            fee: Decimal::zero(),
+    ///            balance: Some(Decimal::new(5, 0)),
+    ///     };
+    ///
+    ///    let sample_vec = vec![sample_ledger_1, sample_ledger_2];
+    ///
+    ///    let kraken_parser = KrakenParser::new(sample_vec);
+    ///    let reward_map = kraken_parser.staking_rewards();
+    ///    assert_eq!(reward_map.len(), 2);
+    ///
+    ///
+    ///    assert_eq!(*reward_map.get("ADA").unwrap(), Decimal::new(5, 0));
+    ///    assert_eq!(*reward_map.get("DOT").unwrap(), Decimal::new(51002, 4));
+    /// ```
     fn staking_rewards(&self) -> HashMap<String, Decimal> {
         self.data
             .iter()
