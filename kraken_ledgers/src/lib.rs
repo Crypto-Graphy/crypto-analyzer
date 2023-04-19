@@ -178,11 +178,48 @@ impl InputTransactions<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> 
     /// # use chrono::{TimeZone, Utc};
     /// # use models::{
     /// #   kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
-    /// #   RecordsByAsset,
+    /// #   InputTransactions,
     /// # };
     /// # use rust_decimal::prelude::{Decimal, Zero};
     /// # use kraken_ledgers::KrakenParser;
     /// #
+    ///
+    /// let sample_ledger_1 = KrakenLedgerRecord { // creates the first sample ledger
+    ///    txid: Some("321LII-OFGWB-JTUO7J".to_string()),
+    ///    refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///    time: Utc
+    ///        .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///        .unwrap(),
+    ///    record_type: "buy".to_string(),
+    ///    subtype: None,
+    ///    a_class: "currency".to_string(),
+    ///    asset: "DOT".to_string(),
+    ///    amount: Decimal::new(51002, 4),
+    ///    fee: Decimal::zero(),
+    ///    balance: Some(Decimal::new(51002, 4)),
+    /// };
+    ///
+    /// let sample_ledger_2 = KrakenLedgerRecord { // creates the first sample ledger
+    ///    txid: Some("321LII-OFGWB-JTUO7J".to_string()),
+    ///    refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///    time: Utc
+    ///        .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///        .unwrap(),
+    ///    record_type: "sell".to_string(),
+    ///    subtype: None,
+    ///    a_class: "currency".to_string(),
+    ///    asset: "DOT".to_string(),
+    ///    amount: Decimal::new(-51002, 4),
+    ///    fee: Decimal::zero(),
+    ///    balance: Some(Decimal::new(0, 0)),
+    /// };
+    ///
+    /// let sample_vec = vec![sample_ledger_1, sample_ledger_2];
+    /// let kraken_parser = KrakenParser::new(sample_vec.clone());
+    /// let inputs = kraken_parser.input_transactions();
+    ///
+    /// assert_eq!(inputs.len(), 1);
+    /// assert_eq!(inputs.iter().next().unwrap(), &sample_vec.iter().next().unwrap());
     fn input_transactions(&self) -> Vec<&KrakenLedgerRecord> {
         self.data
             .iter()
