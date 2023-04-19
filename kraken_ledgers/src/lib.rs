@@ -103,6 +103,62 @@ impl ActiveAssetValues for KrakenParser<KrakenLedgerRecord> {
 }
 
 impl RecordsByAsset<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
+    /// Retieves assets collected by asset name.
+    /// ```
+    /// # use chrono::{TimeZone, Utc};
+    /// # use models::{
+    /// #   kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
+    /// #   RecordsByAsset,
+    /// # };
+    /// # use rust_decimal::prelude::{Decimal, Zero};
+    /// # use kraken_ledgers::KrakenParser;
+    /// #
+    /// let sample_ledger_1 = KrakenLedgerRecord { // creates the first sample ledger
+    ///    txid: Some("321LII-OFGWB-JTUO7J".to_string()),
+    ///    refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///    time: Utc
+    ///        .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///        .unwrap(),
+    ///    record_type: "staking".to_string(),
+    ///    subtype: None,
+    ///    a_class: "currency".to_string(),
+    ///    asset: "DOT".to_string(),
+    ///    amount: Decimal::new(51002, 4),
+    ///    fee: Decimal::zero(),
+    ///    balance: Some(Decimal::new(5, 0)),
+    /// };
+    ///
+    /// let sample_ledger_2 = KrakenLedgerRecord { // creates the second sample ledger
+    ///    txid: Some("012OJA-OFGWB-JTUO7J".to_string()),
+    ///    refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+    ///    time: Utc
+    ///        .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+    ///        .unwrap(),
+    ///    record_type: "staking".to_string(),
+    ///    subtype: None,
+    ///    a_class: "currency".to_string(),
+    ///    asset: "DOT".to_string(),
+    ///    amount: Decimal::new(5, 0),
+    ///    fee: Decimal::zero(),
+    ///    balance: Some(Decimal::new(5, 0)),
+    /// };
+    ///
+    /// let sample_vec = vec![sample_ledger_1, sample_ledger_2]; // Create vec to use
+    ///
+    /// let kraken_parser = KrakenParser::new(sample_vec.clone());
+    /// let map = kraken_parser.by_asset();
+
+    /// assert_eq!(map.keys().len(), 1);
+    /// assert_eq!(map.get("DOT").unwrap().len(), 2);
+    /// assert_eq!(
+    ///    **map.get("DOT").unwrap().iter().next().unwrap(),
+    ///    *sample_vec.get(0).unwrap()
+    /// );
+    /// assert_eq!(
+    ///    **map.get("DOT").unwrap().iter().nth(1).unwrap(),
+    ///    *sample_vec.get(1).unwrap()
+    /// );
+    /// ```
     fn by_asset(&self) -> HashMap<String, Vec<&KrakenLedgerRecord>> {
         self.data
             .iter()
@@ -118,6 +174,15 @@ impl RecordsByAsset<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
 }
 
 impl InputTransactions<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
+    /// ```
+    /// # use chrono::{TimeZone, Utc};
+    /// # use models::{
+    /// #   kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
+    /// #   RecordsByAsset,
+    /// # };
+    /// # use rust_decimal::prelude::{Decimal, Zero};
+    /// # use kraken_ledgers::KrakenParser;
+    /// #
     fn input_transactions(&self) -> Vec<&KrakenLedgerRecord> {
         self.data
             .iter()
