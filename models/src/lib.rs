@@ -152,4 +152,83 @@ pub mod kraken {
         Utc.datetime_from_str(&s.unwrap(), DATE_FORMAT)
             .map_err(serde::de::Error::custom)
     }
+
+    #[cfg(test)]
+    mod input_transaction_should {
+        use chrono::{TimeZone, Utc};
+        use rust_decimal::{prelude::Zero, Decimal};
+
+        use crate::InputTransaction;
+
+        use super::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT};
+
+        #[test]
+        fn find_positive_amount_as_input() {
+            let record = KrakenLedgerRecord {
+                txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "buy".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "BTC".to_string(),
+                amount: Decimal::new(51002, 4),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            assert!(
+                record.is_input_transaction(),
+                "Input transaction was not seen as an input transaction"
+            );
+        }
+
+        #[test]
+        fn find_negative_amount_as_not_input() {
+            let record = KrakenLedgerRecord {
+                txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "sell".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "BTC".to_string(),
+                amount: Decimal::new(-51002, 4),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            assert!(
+                !record.is_input_transaction(),
+                "Output transaction was seen as an input transaction"
+            );
+        }
+
+        #[test]
+        fn find_zero_amount_as_input() {
+            let record = KrakenLedgerRecord {
+                txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "sell".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "BTC".to_string(),
+                amount: Decimal::new(0, 0),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            assert!(
+                record.is_input_transaction(),
+                "Zero amount transaction was not seen as an input transaction"
+            );
+        }
+    }
 }
