@@ -1,19 +1,25 @@
-pub mod ledger_parser {
-    extern crate csv;
-    extern crate rust_decimal;
-    extern crate serde;
-    use std::collections::HashMap;
+use std::collections::HashMap;
 
-    extern crate models;
-    use self::rust_decimal::Decimal;
+pub use models::{
+    kraken::{KrakenLedgerRecord, CSV_HEADERS, DATE_FORMAT},
+    StakingRewards,
+};
+pub use rust_decimal::Decimal;
 
-    pub use self::models::kraken::{KrakenLedgerRecord, CSV_HEADERS, DATE_FORMAT};
+pub struct KrakenParser<T> {
+    data: Vec<T>,
+}
 
-    pub fn get_total_staking_rewards_map<'a, I>(records: I) -> HashMap<String, Decimal>
-    where
-        I: Iterator<Item = &'a KrakenLedgerRecord>,
-    {
-        records
+impl<T> KrakenParser<T> {
+    pub fn new(data: Vec<T>) -> Self {
+        Self { data }
+    }
+}
+
+impl StakingRewards for KrakenParser<KrakenLedgerRecord> {
+    fn staking_rewards(&self) -> HashMap<String, Decimal> {
+        self.data
+            .iter()
             .filter(|record| record.record_type.eq("staking"))
             .fold(HashMap::new(), |mut reward_map, record| {
                 if let Some(value) = reward_map.get(&record.asset) {
@@ -25,6 +31,130 @@ pub mod ledger_parser {
                 reward_map
             })
     }
+}
+
+#[cfg(test)]
+mod staking_rewards_for {
+    #[cfg(test)]
+    mod kraken_ledger_record {
+        use chrono::{TimeZone, Utc};
+        use models::{
+            kraken::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT},
+            StakingRewards,
+        };
+        use rust_decimal::prelude::{Decimal, Zero};
+
+        use crate::KrakenParser;
+
+        #[test]
+        fn should_get_staking_rewards_for_multiple() {
+            let sample_ledger_1 = KrakenLedgerRecord {
+                txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "staking".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "DOT".to_string(),
+                amount: Decimal::new(51002, 4),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            let sample_ledger_2 = KrakenLedgerRecord {
+                txid: Some("899OJA-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "staking".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "ADA".to_string(),
+                amount: Decimal::new(5, 0),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            let sample_vec = vec![sample_ledger_1, sample_ledger_2];
+
+            let kraken_parser = KrakenParser::new(sample_vec);
+            let reward_map = kraken_parser.staking_rewards();
+            assert_eq!(reward_map.len(), 2);
+
+            // Keys
+            let mut keys: Vec<String> = reward_map.keys().cloned().collect();
+            keys.sort();
+            assert_eq!(keys[0], "ADA");
+            assert_eq!(keys[1], "DOT");
+
+            // Values
+            let mut values = reward_map.values().cloned().collect::<Vec<Decimal>>();
+            values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+            assert_eq!(values[0], Decimal::new(5, 0));
+            assert_eq!(values[1], Decimal::new(51002, 4));
+        }
+
+        #[test]
+        fn should_sum_rewards_of_the_same_currency() {
+            let sample_ledger_1 = KrakenLedgerRecord {
+                txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "staking".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "DOT".to_string(),
+                amount: Decimal::new(510020000, 8),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            let sample_ledger_2 = KrakenLedgerRecord {
+                txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
+                refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
+                time: Utc
+                    .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
+                    .unwrap(),
+                record_type: "staking".to_string(),
+                subtype: None,
+                a_class: "currency".to_string(),
+                asset: "DOT".to_string(),
+                amount: Decimal::new(5, 0),
+                fee: Decimal::zero(),
+                balance: Some(Decimal::new(5, 0)),
+            };
+
+            let expected = Decimal::new(51002, 4) + Decimal::new(5, 0);
+
+            let kraken_parser = KrakenParser::new(vec![sample_ledger_1, sample_ledger_2]);
+            let reward_map = kraken_parser.staking_rewards();
+
+            assert_eq!(*reward_map.get("DOT").unwrap(), expected);
+        }
+
+        #[test]
+        fn get_total_staking_rewards_when_given_empty_vec() {
+            let sample_vec: Vec<KrakenLedgerRecord> = Vec::new();
+            let kraken_parser = KrakenParser::new(sample_vec);
+            let reward_map = kraken_parser.staking_rewards();
+
+            assert!(reward_map.is_empty(), "staking rewards is not empty");
+        }
+    }
+}
+
+pub mod ledger_parser {
+    use std::collections::HashMap;
+
+    use super::Decimal;
+
+    use super::KrakenLedgerRecord;
 
     pub fn get_book_of_record<'a, I>(records: I) -> HashMap<String, Decimal>
     where
@@ -60,123 +190,11 @@ pub mod ledger_parser {
 }
 
 #[cfg(test)]
-mod test {
-    extern crate chrono;
-    extern crate rust_decimal;
-
-    use self::rust_decimal::{prelude::Zero, Decimal};
-
-    use self::chrono::prelude::*;
-    use super::ledger_parser::{
-        get_total_staking_rewards_map, KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT,
-    };
-
-    #[test]
-    fn should_get_staking_rewards_for_multiple() {
-        let sample_ledger_1 = KrakenLedgerRecord {
-            txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
-            refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: Utc
-                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
-                .unwrap(),
-            record_type: "staking".to_string(),
-            subtype: None,
-            a_class: "currency".to_string(),
-            asset: "DOT".to_string(),
-            amount: Decimal::new(51002, 4),
-            fee: Decimal::zero(),
-            balance: Some(Decimal::new(5, 0)),
-        };
-
-        let sample_ledger_2 = KrakenLedgerRecord {
-            txid: Some("899OJA-OFGWB-JTUO7J".to_string()),
-            refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: Utc
-                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
-                .unwrap(),
-            record_type: "staking".to_string(),
-            subtype: None,
-            a_class: "currency".to_string(),
-            asset: "ADA".to_string(),
-            amount: Decimal::new(5, 0),
-            fee: Decimal::zero(),
-            balance: Some(Decimal::new(5, 0)),
-        };
-
-        let sample_vec = vec![sample_ledger_1, sample_ledger_2];
-
-        let actual = get_total_staking_rewards_map(sample_vec.iter());
-        assert_eq!(actual.len(), 2);
-
-        // Keys
-        let mut keys: Vec<String> = actual.keys().cloned().collect();
-        keys.sort();
-        assert_eq!(keys[0], "ADA");
-        assert_eq!(keys[1], "DOT");
-
-        // Values
-        let mut values = actual.values().cloned().collect::<Vec<Decimal>>();
-        values.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-        assert_eq!(values[0], Decimal::new(5, 0));
-        assert_eq!(values[1], Decimal::new(51002, 4));
-    }
-
-    #[test]
-    fn should_sum_rewards_of_the_same_currency() {
-        let sample_ledger_1 = KrakenLedgerRecord {
-            txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
-            refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: Utc
-                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
-                .unwrap(),
-            record_type: "staking".to_string(),
-            subtype: None,
-            a_class: "currency".to_string(),
-            asset: "DOT".to_string(),
-            amount: Decimal::new(510020000, 8),
-            fee: Decimal::zero(),
-            balance: Some(Decimal::new(5, 0)),
-        };
-
-        let sample_ledger_2 = KrakenLedgerRecord {
-            txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
-            refid: "RKB7ODD-ILZGC5-LCRRBL".to_string(),
-            time: Utc
-                .datetime_from_str("2021-09-29 15:18:30", KRAKEN_DATE_FORMAT)
-                .unwrap(),
-            record_type: "staking".to_string(),
-            subtype: None,
-            a_class: "currency".to_string(),
-            asset: "DOT".to_string(),
-            amount: Decimal::new(5, 0),
-            fee: Decimal::zero(),
-            balance: Some(Decimal::new(5, 0)),
-        };
-
-        let expected = Decimal::from_str_radix("5.10020000", 10).unwrap() + Decimal::new(5, 0);
-
-        let reward_map =
-            get_total_staking_rewards_map(vec![sample_ledger_1, sample_ledger_2].iter());
-
-        assert_eq!(*reward_map.get("DOT").unwrap(), expected);
-    }
-
-    #[test]
-    fn get_total_staking_rewards_when_given_empty_vec() {
-        let sample_vec: Vec<KrakenLedgerRecord> = Vec::new();
-        let actual = get_total_staking_rewards_map(sample_vec.iter());
-
-        assert!(actual.is_empty(), "staking rewards is not empty");
-    }
-}
-
-#[cfg(test)]
 mod book_of_record {
     extern crate chrono;
     extern crate rust_decimal;
-    use super::ledger_parser::{
-        get_book_of_record, KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT,
+    use super::{
+        ledger_parser::get_book_of_record, KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT,
     };
 
     use self::chrono::prelude::*;
