@@ -10,3 +10,4 @@ diesel.workspace = true
 chrono.workspace = true
 serde.workspace = true
 rust_decimal.workspace = true
+models = { path = "../models" }

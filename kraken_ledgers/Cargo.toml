@@ -2,6 +2,7 @@
 name = "kraken_ledgers"
 version = "0.1.0"
 authors = ["1x2kb 1x2kb@github.com"]
+edition = "2021"
 
 [dependencies]
 csv.workspace = true

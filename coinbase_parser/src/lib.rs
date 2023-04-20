@@ -1,5 +1,6 @@
 use std::{collections::HashMap, slice::Iter, str::FromStr};
 
+use models::InputTransaction;
 use models_db::CoinbaseTransaction;
 use rust_decimal::Decimal;
 
@@ -128,11 +129,7 @@ impl InputTransactions<CoinbaseTransactionRecord> for CoinbaseParser<CoinbaseTra
     fn input_transactions(&self) -> Vec<&CoinbaseTransactionRecord> {
         self.data
             .iter()
-            .filter(|transaction| {
-                INPUT_TRANSACTIONS.iter().any(|received_transaction_type| {
-                    received_transaction_type.eq(&transaction.transaction_type)
-                })
-            })
+            .filter(|transaction| transaction.is_input_transaction())
             .collect()
     }
 }
@@ -490,6 +487,7 @@ mod staking_reward_for {
         }
     }
 
+    #[cfg(test)]
     mod coinbase_transaction {
         use chrono::{DateTime, Utc};
         use models_db::CoinbaseTransaction;
