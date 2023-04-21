@@ -18,6 +18,6 @@ chrono.workspace = true
 
 [dev-dependencies]
 coinbase_parser = { path = "../coinbase_parser" } # Used in unit testing
-kraken_ledgers = { path = "../kraken_ledgers" }               # Used in unit testing
+kraken_parser = { path = "../kraken_parser" }               # Used in unit testing
 rust_decimal.workspace = true
 actix-rt = "2.8.0"
