@@ -27,7 +27,7 @@ impl StakingRewards for KrakenParser<KrakenLedgerRecord> {
     ///    };
     ///    use rust_decimal::prelude::{Decimal, Zero};
     ///
-    ///    use kraken_ledgers::KrakenParser;
+    ///    use kraken_parser::KrakenParser;
     ///
     ///
     ///         let sample_ledger_1 = KrakenLedgerRecord {
@@ -95,7 +95,7 @@ impl ActiveAssetValues for KrakenParser<KrakenLedgerRecord> {
     /// #   ActiveAssetValues,
     /// # };
     /// # use rust_decimal::prelude::{Decimal, Zero};
-    /// # use kraken_ledgers::KrakenParser;
+    /// # use kraken_parser::KrakenParser;
     /// #
     /// let sample_ledger_1 = KrakenLedgerRecord {
     ///     txid: Some("L7RLII-OFGWB-JTUO7J".to_string()),
@@ -163,7 +163,7 @@ impl RecordsByAsset<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> {
     /// #   RecordsByAsset,
     /// # };
     /// # use rust_decimal::prelude::{Decimal, Zero};
-    /// # use kraken_ledgers::KrakenParser;
+    /// # use kraken_parser::KrakenParser;
     /// #
     /// let sample_ledger_1 = KrakenLedgerRecord { // creates the first sample ledger
     ///    txid: Some("321LII-OFGWB-JTUO7J".to_string()),
@@ -233,7 +233,7 @@ impl InputTransactions<KrakenLedgerRecord> for KrakenParser<KrakenLedgerRecord> 
     /// #   InputTransactions,
     /// # };
     /// # use rust_decimal::prelude::{Decimal, Zero};
-    /// # use kraken_ledgers::KrakenParser;
+    /// # use kraken_parser::KrakenParser;
     /// #
     ///
     /// let sample_ledger_1 = KrakenLedgerRecord { // creates the first sample ledger

@@ -9,6 +9,6 @@ edition = "2021"
 axum = "0.6.10"
 tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
 coinbase_parser = { path = "../../coinbase_parser" }
-kraken_ledgers = { path = "../../kraken_ledgers" }
+kraken_parser = { path = "../../kraken_parser" }
 serde.workspace = true
 csv_parser = { path = "../../csv_parser" }

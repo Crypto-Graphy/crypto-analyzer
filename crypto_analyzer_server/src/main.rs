@@ -101,7 +101,7 @@ mod parse_csver_should {
     use std::{str::FromStr, vec};
 
     use coinbase_parser::CoinbaseTransactionRecord;
-    use kraken_ledgers::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT};
+    use kraken_parser::{KrakenLedgerRecord, DATE_FORMAT as KRAKEN_DATE_FORMAT};
 
     use axum::{http::StatusCode, Json};
     use parse_csv::CsvType;

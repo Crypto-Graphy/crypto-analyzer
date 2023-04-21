@@ -310,7 +310,7 @@ dependencies = [
  "coinbase_actions",
  "coinbase_parser",
  "crypto_database",
- "kraken_ledgers",
+ "kraken_parser",
  "parse_csv",
  "rust_decimal",
  "serde",
@@ -728,7 +728,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "kraken_ledgers"
+name = "kraken_parser"
 version = "0.1.0"
 dependencies = [
  "chrono",
@@ -921,7 +921,7 @@ dependencies = [
  "axum",
  "coinbase_parser",
  "csv_parser",
- "kraken_ledgers",
+ "kraken_parser",
  "serde",
  "tokio",
 ]

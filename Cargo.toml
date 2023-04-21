@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "coinbase_parser",
-    "kraken_ledgers",
+    "kraken_parser",
     "coin_gecko",
     "crypto_analyzer_server",
     "csv_runner",
