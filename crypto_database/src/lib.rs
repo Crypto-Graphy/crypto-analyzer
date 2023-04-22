@@ -67,3 +67,49 @@ pub mod coinbase_db {
             .get_result::<CoinbaseTransaction>(connection)
     }
 }
+
+pub mod kraken_db {
+    use diesel::{prelude::*, result::Error};
+    pub use models_db::{
+        self,
+        schema::{self, kraken_transactions::dsl::kraken_transactions},
+        KrakenTransaction, NewKrakenTransaction, Pagination,
+    };
+
+    pub fn insert_kraken_transaction(
+        new_kraken_transaction: NewKrakenTransaction,
+        connection: &mut PgConnection,
+    ) -> Result<KrakenTransaction, Error> {
+        diesel::insert_into(kraken_transactions)
+            .values(&new_kraken_transaction)
+            .get_result::<KrakenTransaction>(connection)
+    }
+
+    pub fn bulk_insert_kraken_transaction(
+        new_kraken_transactions: Vec<NewKrakenTransaction>,
+        connection: &mut PgConnection,
+    ) -> Result<Vec<KrakenTransaction>, Error> {
+        diesel::insert_into(kraken_transactions)
+            .values(&new_kraken_transactions)
+            .get_results::<KrakenTransaction>(connection)
+    }
+
+    pub fn get_kraken_transactions(
+        pagination: &Pagination,
+        connection: &mut PgConnection,
+    ) -> Result<Vec<KrakenTransaction>, Error> {
+        kraken_transactions
+            .offset(pagination.items_per_page * pagination.page)
+            .limit(pagination.items_per_page)
+            .get_results::<KrakenTransaction>(connection)
+    }
+
+    pub fn get_kraken_transaction(
+        id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<KrakenTransaction, Error> {
+        kraken_transactions
+            .find(id)
+            .get_result::<KrakenTransaction>(connection)
+    }
+}
