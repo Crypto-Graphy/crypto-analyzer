@@ -32,7 +32,4 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(
-    coinbase_transactions,
-    kraken_transactions,
-);
+diesel::allow_tables_to_appear_in_same_query!(coinbase_transactions, kraken_transactions,);
