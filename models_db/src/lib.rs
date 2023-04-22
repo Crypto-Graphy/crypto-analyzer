@@ -1,6 +1,6 @@
 pub mod schema;
 
-use crate::schema::coinbase_transactions;
+use crate::schema::{coinbase_transactions, kraken_transactions};
 use chrono::prelude::*;
 use diesel::prelude::*;
 use models::{coinbase::INPUT_TRANSACTIONS, InputTransaction};
@@ -44,6 +44,37 @@ pub struct NewCoinbaseTransaction {
     pub total: Option<Decimal>,
     pub fees: Option<Decimal>,
     pub notes: String,
+}
+
+#[derive(Queryable, Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[serde(rename_all(serialize = "camelCase"))]
+pub struct KrakenTransaction {
+    pub id: i32,
+    pub txid: Option<String>,
+    pub refid: String,
+    pub transaction_time: DateTime<Utc>,
+    pub record_type: String,
+    pub subtype: Option<String>,
+    pub a_class: String,
+    pub asset: String,
+    pub amount: Decimal,
+    pub fee: Decimal,
+    pub balance: Option<Decimal>,
+}
+
+#[derive(Insertable, Deserialize, PartialEq, Eq, Clone)]
+#[diesel(table_name = kraken_transactions)]
+pub struct NewKrakenTransaction {
+    pub txid: Option<String>,
+    pub refid: String,
+    pub transaction_time: DateTime<Utc>,
+    pub record_type: String,
+    pub subtype: Option<String>,
+    pub a_class: String,
+    pub asset: String,
+    pub amount: Decimal,
+    pub fee: Decimal,
+    pub balance: Option<Decimal>,
 }
 
 #[derive(Deserialize)]
