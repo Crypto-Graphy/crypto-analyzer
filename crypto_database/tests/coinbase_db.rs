@@ -18,9 +18,8 @@ mod coinbase_db_should {
 
     use crate::common::create_test_context;
 
-    // use crate::common;
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
-    pub const ASDF: &'static str = "coinbase_test_database";
+    pub const COINBASE_DB_NAME: &'static str = "coinbase_test_database";
 
     fn create_random_new_coinbase_transaction() -> NewCoinbaseTransaction {
         let assets = vec!["ADA", "BTC", "SOL", "ETH"];
@@ -78,7 +77,7 @@ mod coinbase_db_should {
 
     #[test]
     fn insert_coinbase_data() {
-        let ctx = create_test_context(Some(ASDF.to_owned()));
+        let ctx = create_test_context(Some(COINBASE_DB_NAME.to_owned()));
 
         let mut write_connection = ctx.create_connection();
         write_connection.run_pending_migrations(MIGRATIONS).unwrap();
@@ -112,7 +111,7 @@ mod coinbase_db_should {
 
     #[test]
     fn retrieve_existing_coinbase_transactions() {
-        let ctx = create_test_context(Some(ASDF.to_owned()));
+        let ctx = create_test_context(Some(COINBASE_DB_NAME.to_owned()));
 
         let mut test_connection = ctx.create_connection();
         test_connection.run_pending_migrations(MIGRATIONS).unwrap();
@@ -158,7 +157,7 @@ mod coinbase_db_should {
 
     #[test]
     fn page_retrieved_transactions() {
-        let ctx = create_test_context(Some(ASDF.to_owned()));
+        let ctx = create_test_context(Some(COINBASE_DB_NAME.to_owned()));
 
         let mut test_connection = ctx.create_connection();
         test_connection.run_pending_migrations(MIGRATIONS).unwrap();
