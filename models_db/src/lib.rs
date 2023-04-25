@@ -93,25 +93,13 @@ impl Default for Pagination {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct DBConfigOptions {
     pub host: Option<String>,
     pub port: Option<String>,
     pub username: Option<String>,
     pub password: Option<String>,
     pub database_name: Option<String>,
-}
-
-impl Default for DBConfigOptions {
-    fn default() -> Self {
-        Self {
-            host: Default::default(),
-            port: Default::default(),
-            username: Default::default(),
-            password: Default::default(),
-            database_name: Default::default(),
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -149,7 +137,7 @@ impl DBConfig {
                     .database_name
                     .unwrap_or(default_config.database_name),
             },
-            None => return default_config,
+            None => default_config,
         }
     }
 
