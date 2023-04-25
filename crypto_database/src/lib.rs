@@ -1,64 +1,16 @@
 use diesel::*;
+use models_db::DBConfig;
 
-pub struct DBConfig {
-    host: String,
-    port: String,
-    username: String,
-    password: String,
-    database_name: String,
-}
+pub fn establish_connection(config: Option<DBConfig>) -> Result<PgConnection, ConnectionError> {
+    let config = config.unwrap_or_default();
+    println!(
+        "Attempting to connect to {}:{}/{}",
+        config.get_host(),
+        config.get_port(),
+        config.get_database_name()
+    );
 
-impl Default for DBConfig {
-    fn default() -> Self {
-        Self {
-            host: "0.0.0.0".to_string(),
-            port: "5432".to_string(),
-            username: "super_user".to_string(),
-            password: "password".to_string(),
-            database_name: "crypto_data".to_string(),
-        }
-    }
-}
-
-impl DBConfig {
-    pub fn connection_string(&self) -> String {
-        "postgres://{self.user_name}:{self.password}@{self.host}:{self.port}/{self.database_name}"
-            .into()
-    }
-
-    pub fn init_from_env() -> Self {
-        let default = Self::default();
-
-        Self {
-            host: std::env::var("DB_HOST").unwrap_or(default.host),
-            port: std::env::var("DB_PORT").unwrap_or(default.port),
-            username: std::env::var("DB_USER").unwrap_or(default.username),
-            password: std::env::var("DB_PASSWORD").unwrap_or(default.password),
-            database_name: std::env::var("DB_NAME").unwrap_or(default.database_name),
-        }
-    }
-}
-
-pub fn get_connection_string() -> (String, String, String, String) {
-    let host = std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string());
-    let port = std::env::var("DB_PORT").unwrap_or("5432".to_string());
-    let user_name = std::env::var("DB_USER").unwrap_or("super_user".to_string());
-    let password = std::env::var("DB_PASSWORD").unwrap_or("password".to_string());
-    let database_name = std::env::var("DB_NAME").unwrap_or("crypto_data".to_string());
-
-    (
-        format!("postgres://{user_name}:{password}@{host}:{port}/{database_name}"),
-        host,
-        port,
-        database_name,
-    )
-}
-
-pub fn establish_connection() -> Result<PgConnection, ConnectionError> {
-    let (db_url, host, port, db_name) = get_connection_string();
-    println!("Attempting to connect to {host}:{port}/{db_name}");
-
-    PgConnection::establish(&db_url)
+    PgConnection::establish(&config.connection_string())
 }
 
 pub mod coinbase_db {

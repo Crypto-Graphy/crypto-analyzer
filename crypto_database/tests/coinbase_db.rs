@@ -1,6 +1,7 @@
 mod common;
 
 mod coinbase_db_should {
+    use models_db::{DBConfig, DBConfigOptions};
     use rand::{self, Rng};
     use std::sync::atomic::Ordering;
 
@@ -17,21 +18,10 @@ mod coinbase_db_should {
 
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-    use super::common::{Config, TestContext, TEST_DB_COUNTER};
+    use super::common::{TestContext, TEST_DB_COUNTER};
 
     // use crate::common;
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
-
-    fn create_config_from_env_vars(db_name: Option<String>) -> Config {
-        Config {
-            host: std::env::var("DB_HOST").unwrap_or("0.0.0.0".to_string()),
-            port: std::env::var("DB_PORT").unwrap_or("5432".to_string()),
-            user: std::env::var("DB_USER").unwrap_or("super_user".to_string()),
-            password: std::env::var("DB_PASSWORD").unwrap_or("password".to_string()),
-            db_name: db_name
-                .unwrap_or(std::env::var("DB_NAME").unwrap_or("crypto_data".to_string())),
-        }
-    }
 
     fn create_random_new_coinbase_transaction() -> NewCoinbaseTransaction {
         let assets = vec!["ADA", "BTC", "SOL", "ETH"];
@@ -68,12 +58,18 @@ mod coinbase_db_should {
         }
     }
 
-    fn create_test_context(db_id: u8) -> TestContext {
-        let config = create_config_from_env_vars(Some(format!("test_database_{}", db_id)));
+    fn create_test_context() -> TestContext {
+        let config = DBConfig::new(Some(DBConfigOptions {
+            database_name: Some(format!(
+                "coinbase_test_database_{}",
+                TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst)
+            )),
+            ..Default::default()
+        }));
 
         TestContext::new(
             config,
-            crypto_database::establish_connection()
+            crypto_database::establish_connection(None)
                 .expect("Failed to establish a connection to the database"),
         )
     }
@@ -99,7 +95,7 @@ mod coinbase_db_should {
 
     #[test]
     fn insert_coinbase_data() {
-        let ctx = create_test_context(TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst));
+        let ctx = create_test_context();
 
         let mut write_connection = ctx.create_connection();
         write_connection.run_pending_migrations(MIGRATIONS).unwrap();
@@ -133,7 +129,7 @@ mod coinbase_db_should {
 
     #[test]
     fn retrieve_existing_coinbase_transactions() {
-        let ctx = create_test_context(TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst));
+        let ctx = create_test_context();
 
         let mut test_connection = ctx.create_connection();
         test_connection.run_pending_migrations(MIGRATIONS).unwrap();
@@ -179,7 +175,7 @@ mod coinbase_db_should {
 
     #[test]
     fn page_retrieved_transactions() {
-        let ctx = create_test_context(TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst));
+        let ctx = create_test_context();
 
         let mut test_connection = ctx.create_connection();
         test_connection.run_pending_migrations(MIGRATIONS).unwrap();
