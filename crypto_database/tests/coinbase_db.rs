@@ -1,9 +1,7 @@
 mod common;
 
 mod coinbase_db_should {
-    use models_db::{DBConfig, DBConfigOptions};
     use rand::{self, Rng};
-    use std::sync::atomic::Ordering;
 
     use chrono::{DateTime, Utc};
     use crypto_database::{
@@ -18,10 +16,11 @@ mod coinbase_db_should {
 
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-    use super::common::{TestContext, TEST_DB_COUNTER};
+    use crate::common::create_test_context;
 
     // use crate::common;
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+    pub const ASDF: &'static str = "coinbase_test_database";
 
     fn create_random_new_coinbase_transaction() -> NewCoinbaseTransaction {
         let assets = vec!["ADA", "BTC", "SOL", "ETH"];
@@ -58,22 +57,6 @@ mod coinbase_db_should {
         }
     }
 
-    fn create_test_context() -> TestContext {
-        let config = DBConfig::new(Some(DBConfigOptions {
-            database_name: Some(format!(
-                "coinbase_test_database_{}",
-                TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst)
-            )),
-            ..Default::default()
-        }));
-
-        TestContext::new(
-            config,
-            crypto_database::establish_connection(None)
-                .expect("Failed to establish a connection to the database"),
-        )
-    }
-
     fn create_coinbase_transaction_from_new(
         new_coinbase_transaction: NewCoinbaseTransaction,
         id: i32,
@@ -95,7 +78,7 @@ mod coinbase_db_should {
 
     #[test]
     fn insert_coinbase_data() {
-        let ctx = create_test_context();
+        let ctx = create_test_context(Some(ASDF.to_owned()));
 
         let mut write_connection = ctx.create_connection();
         write_connection.run_pending_migrations(MIGRATIONS).unwrap();
@@ -129,7 +112,7 @@ mod coinbase_db_should {
 
     #[test]
     fn retrieve_existing_coinbase_transactions() {
-        let ctx = create_test_context();
+        let ctx = create_test_context(Some(ASDF.to_owned()));
 
         let mut test_connection = ctx.create_connection();
         test_connection.run_pending_migrations(MIGRATIONS).unwrap();
@@ -175,7 +158,7 @@ mod coinbase_db_should {
 
     #[test]
     fn page_retrieved_transactions() {
-        let ctx = create_test_context();
+        let ctx = create_test_context(Some(ASDF.to_owned()));
 
         let mut test_connection = ctx.create_connection();
         test_connection.run_pending_migrations(MIGRATIONS).unwrap();
