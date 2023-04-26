@@ -331,6 +331,7 @@ dependencies = [
  "rand",
  "rust_decimal",
  "serde",
+ "uuid",
 ]
 
 [[package]]
