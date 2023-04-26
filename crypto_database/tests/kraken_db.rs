@@ -1,20 +1,18 @@
 mod common;
 
 mod kraken_db_should {
-    use chrono::{DateTime, Utc};
+    use chrono::DateTime;
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
     use uuid::Uuid;
 
     use crate::common::create_test_context;
     use crypto_database::kraken_db;
-    use models_db::{
-        schema::kraken_transactions, KrakenTransaction, NewKrakenTransaction, Pagination,
-    };
+    use models_db::{KrakenTransaction, NewKrakenTransaction, Pagination};
     use rand::{self, Rng};
     use rust_decimal::Decimal;
 
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
-    const KRAKEN_DB_NAME: &'static str = "kraken_test_database";
+    const KRAKEN_DB_NAME: &str = "kraken_test_database";
 
     #[test]
     fn insert_kraken() {
@@ -31,7 +29,7 @@ mod kraken_db_should {
         let result =
             kraken_db::insert_kraken_transaction(kraken_transaction.clone(), &mut db_connection)
                 .unwrap();
-        let expected = create_kraken_transaction_from_new(kraken_transaction.clone(), result.id);
+        let expected = create_kraken_transaction_from_new(kraken_transaction, result.id);
         assert_eq!(result, expected); // Tests the return is the same as the input + id assigned by the database.
 
         let kraken_transaction =
@@ -57,10 +55,10 @@ mod kraken_db_should {
             record_type: "Buy".to_string(),
             subtype: None,
             a_class: "".to_string(),
-            asset: asset,
+            asset,
             amount,
             fee,
-            balance: Some(amount.clone()),
+            balance: Some(amount),
         }
     }
 

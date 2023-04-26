@@ -19,7 +19,7 @@ mod coinbase_db_should {
     use crate::common::create_test_context;
 
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
-    pub const COINBASE_DB_NAME: &'static str = "coinbase_test_database";
+    pub const COINBASE_DB_NAME: &str = "coinbase_test_database";
 
     #[test]
     fn insert_coinbase_data() {
