@@ -1,46 +1,34 @@
-use std::sync::atomic::AtomicU8;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 use diesel::{sql_query, Connection, PgConnection, RunQueryDsl};
+use models_db::{DBConfig, DBConfigOptions};
 
 pub static TEST_DB_COUNTER: AtomicU8 = AtomicU8::new(0);
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Config {
-    pub host: String,
-    pub port: String,
-    pub user: String,
-    pub password: String,
-    pub db_name: String,
-}
-
-impl Config {
-    pub fn create_db_url(&self) -> String {
-        format!(
-            "postgres://{}:{}@{}:{}/{}",
-            &self.user, &self.password, &self.host, &self.port, &self.db_name
-        )
-    }
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            host: "0.0.0.0".to_string(),
-            port: "5432".to_string(),
-            user: "super_user".to_string(),
-            password: "password".to_string(),
-            db_name: "crypto_data".to_string(),
-        }
-    }
-}
-
 pub struct TestContext {
-    pub config: Config,
+    pub config: DBConfig,
     connection: PgConnection,
 }
 
+pub fn create_test_context(base_db_name: Option<String>) -> TestContext {
+    let config = DBConfig::new(Some(DBConfigOptions {
+        database_name: Some(format!(
+            "{}_{}",
+            base_db_name.unwrap_or("test_database".to_string()),
+            TEST_DB_COUNTER.fetch_add(1, Ordering::SeqCst)
+        )),
+        ..Default::default()
+    }));
+
+    TestContext::new(
+        config,
+        crypto_database::establish_connection(None)
+            .expect("Failed to establish a connection to the database"),
+    )
+}
+
 impl TestContext {
-    pub fn new(config: Config, connection: PgConnection) -> Self {
+    pub fn new(config: DBConfig, connection: PgConnection) -> Self {
         // TODO: Establish connection and create database.
         let mut ctx = Self { config, connection };
         ctx.setup();
@@ -49,60 +37,24 @@ impl TestContext {
     }
 
     pub fn setup(&mut self) {
-        sql_query(format!("CREATE DATABASE {};", &self.config.db_name))
-            .execute(&mut self.connection)
-            .unwrap();
+        sql_query(format!(
+            "CREATE DATABASE {};",
+            self.config.get_database_name()
+        ))
+        .execute(&mut self.connection)
+        .unwrap();
     }
 
     pub fn create_connection(&self) -> PgConnection {
-        PgConnection::establish(&self.config.create_db_url())
+        PgConnection::establish(&self.config.connection_string())
             .expect("Failed to establish a connection with the database")
     }
-
-    // pub fn set_env_from_config(&self) {
-    //     std::env::set_var("DB_HOST", &self.config.host);
-    //     std::env::set_var("DB_PORT", &self.config.port);
-    //     std::env::set_var("DB_USER", &self.config.user);
-    //     std::env::set_var("DB_PASSWORD", &self.config.password);
-    //     std::env::set_var("DB_NAME", &self.config.db_name);
-    // }
 }
 
 impl Drop for TestContext {
     fn drop(&mut self) {
-        sql_query(format!("DROP DATABASE {}", &self.config.db_name))
+        sql_query(format!("DROP DATABASE {}", self.config.get_database_name()))
             .execute(&mut self.connection)
             .unwrap();
-    }
-}
-
-// Tests for Config (a test only struct)
-// Easier to debug against tests than to create a runnable program to debug against.
-mod config_should {
-    use super::Config;
-
-    #[test]
-    fn create_postgres_url() {
-        let host = "test-host".to_string();
-        let port = "test-port".to_string();
-        let user = "test-user".to_string();
-        let password = "test-password".to_string();
-        let db_name = "test-db-name".to_string();
-
-        let config = Config {
-            host: host.clone(),
-            port: port.clone(),
-            user: user.clone(),
-            password: password.clone(),
-            db_name: db_name.clone(),
-        };
-        let expected = format!(
-            "postgres://{}:{}@{}:{}/{}",
-            user, password, host, port, db_name
-        );
-
-        let url = config.create_db_url();
-
-        assert_eq!(url, expected);
     }
 }
