@@ -4,7 +4,10 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use crypto_database::coinbase_db::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination};
+use crypto_database::{
+    coinbase_db::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
+    kraken_db::{KrakenTransaction, NewKrakenTransaction},
+};
 use parse_csv::{parse_csv, CsvType};
 use server_response::ServerResponse;
 use std::{env, net::SocketAddr, str::FromStr};
@@ -13,7 +16,6 @@ const API_VERSION: &str = "v1";
 
 #[tokio::main]
 async fn main() {
-    // build our application with a single route
     let app = Router::new()
         .route(
             "/",
@@ -34,6 +36,10 @@ async fn main() {
         .route(
             format!("/api/{}/coinbase-transaction", API_VERSION).as_str(),
             post(insert_coinbase_transaction),
+        )
+        .route(
+            format!("/api/{}/kraken-transaction/", API_VERSION).as_str(),
+            post(insert_kraken_transaction),
         );
 
     axum::Server::bind(&get_socket_address())
@@ -93,6 +99,19 @@ async fn insert_coinbase_transaction(
     };
 
     (status_code, Json(coinbase_transaction))
+}
+
+async fn insert_kraken_transaction(
+    payload: Json<NewKrakenTransaction>,
+) -> (StatusCode, Json<ServerResponse<KrakenTransaction>>) {
+    let kraken_transaction = kraken_actions::insert_kraken_transaction(payload.0);
+
+    let status_code = match &kraken_transaction.success {
+        true => StatusCode::CREATED,
+        false => StatusCode::INTERNAL_SERVER_ERROR,
+    };
+
+    (status_code, Json(kraken_transaction))
 }
 
 #[cfg(test)]

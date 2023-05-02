@@ -5,7 +5,8 @@ use crypto_database::coinbase_db::NewCoinbaseTransaction;
 use csv_parser::{Csv, CsvParser};
 
 fn main() {
-    let data = std::fs::read_to_string("./data/very-large-dataset.csv").unwrap();
+    let path = std::env::var("CSV_PATH").unwrap_or("./data/very-large-dataset.csv".to_string());
+    let data = std::fs::read_to_string(path).unwrap();
     let start = SystemTime::now();
     let _data: Vec<NewCoinbaseTransaction> = Csv::parse_csv(&data)
         .into_iter()
