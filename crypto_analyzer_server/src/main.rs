@@ -6,7 +6,7 @@ use axum::{
 };
 use crypto_database::{
     coinbase_db::{CoinbaseTransaction, NewCoinbaseTransaction, Pagination},
-    kraken_db::{self, KrakenTransaction, NewKrakenTransaction},
+    kraken_db::{KrakenTransaction, NewKrakenTransaction},
 };
 use parse_csv::{parse_csv, CsvType};
 use server_response::ServerResponse;
