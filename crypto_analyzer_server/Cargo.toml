@@ -9,6 +9,7 @@ edition = "2021"
 axum = "0.6.10"
 tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
 coinbase_actions = { path = "./coinbase_actions" }
+kraken_actions = { path = "./kraken_actions" }
 parse_csv = { path = "./parse_csv" }
 server_response = { path = "./server_response" }
 crypto_database = { path = "../crypto_database" }

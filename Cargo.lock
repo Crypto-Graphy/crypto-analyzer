@@ -310,6 +310,7 @@ dependencies = [
  "coinbase_actions",
  "coinbase_parser",
  "crypto_database",
+ "kraken_actions",
  "kraken_parser",
  "parse_csv",
  "rust_decimal",
@@ -726,6 +727,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49409df3e3bf0856b916e2ceaca09ee28e6871cf7d9ce97a692cacfdb2a25a47"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "kraken_actions"
+version = "0.1.0"
+dependencies = [
+ "crypto_database",
+ "server_response",
+ "uuid",
 ]
 
 [[package]]
