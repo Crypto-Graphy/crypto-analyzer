@@ -11,6 +11,7 @@ use crypto_database::{
 use parse_csv::{parse_csv, CsvType};
 use server_response::ServerResponse;
 use std::{env, net::SocketAddr, str::FromStr};
+use tower_http::cors::{Any, CorsLayer};
 
 const API_VERSION: &str = "v1";
 
@@ -50,8 +51,9 @@ async fn main() {
             post(insert_kraken_transaction),
         );
 
+    let coors_layer = CorsLayer::new().allow_origin(Any);
     axum::Server::bind(&get_socket_address())
-        .serve(app.into_make_service())
+        .serve(app.layer(coors_layer).into_make_service())
         .await
         .unwrap();
 }
@@ -71,6 +73,7 @@ fn get_socket_address() -> SocketAddr {
 }
 
 async fn parse_csver(payload: String) -> (StatusCode, Json<CsvType>) {
+    println!("parsing csv");
     match parse_csv(payload) {
         CsvType::CoinbaseTransactions(value) => {
             (StatusCode::OK, Json(CsvType::CoinbaseTransactions(value)))

@@ -15,6 +15,7 @@ server_response = { path = "./server_response" }
 crypto_database = { path = "../crypto_database" }
 serde.workspace = true
 chrono.workspace = true
+tower-http = { version = "0.4.0", features = ["cors"] }
 
 
 [dev-dependencies]
