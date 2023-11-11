@@ -11,6 +11,8 @@ members = [
     "models_db",
 ]
 
+resolver = "2"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace.package]
 version = "0.1.0"
