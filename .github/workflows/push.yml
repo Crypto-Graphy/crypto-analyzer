@@ -10,9 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: docker compose up -d
+      - uses: baptiste0928/cargo-install@v3.0.1
+        with:
+          crate: diesel_cli
+          features: postgres
+      - uses: isbang/compose-action@v1.5.1
+        with:
+          compose-file: ./docker-compose.yml
+      - run: sleep 5s
+      - run: mv .env-test .env
+      - run: cd crypto_database && diesel migration run
+      - run: cd ..
       - run: cargo test --workspace
-      - run: docker compose down
 
   build:
     name: cargo build
@@ -22,7 +31,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build
         run: cargo build --workspace
- 
+
   # Check formatting with rustfmt
   formatting:
     name: cargo fmt
