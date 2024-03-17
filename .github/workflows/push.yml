@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rust-lang/setup-rust-toolchain@latest
+      - uses: actions-rust-lang/setup-rust-toolchain@v4
         with:
           components: diesel_cli
       - run: echo "DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data" >> .env
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rust-lang/setup-rust-toolchain@latest
+      - uses: actions-rust-lang/setup-rust-toolchain@v4
       - name: Build
         run: cargo build --workspace
 
@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       # Ensure rustfmt is installed and setup problem matcher
-      - uses: actions-rust-lang/setup-rust-toolchain@latest
+      - uses: actions-rust-lang/setup-rust-toolchain@v4
         with:
           components: rustfmt
       - name: Rustfmt Check
