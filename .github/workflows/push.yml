@@ -16,7 +16,7 @@ jobs:
           features: postgres
       - run: echo "DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data" >> .env
       - run: docker compose up -d
-      - run: cd crypto_database && disel migration run
+      - run: cd crypto_database && diesel migration run
       - run: cd ..
       - run: cargo test --workspace
       - run: docker compose down
