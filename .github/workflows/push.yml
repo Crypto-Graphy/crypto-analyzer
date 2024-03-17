@@ -13,7 +13,7 @@ jobs:
       - uses: baptiste0928/cargo-install@v3
           with:
             crate: diesel_cli
-    version: '^0.5' # You can specify any semver range
+              version: latest
       - run: echo "DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data" >> .env
       - run: docker compose up -d
       - run: cd crypto_database && disel migration run
