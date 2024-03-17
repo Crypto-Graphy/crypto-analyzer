@@ -17,6 +17,7 @@ jobs:
       - uses: isbang/compose-action@v1.5.1
         with:
           compose-file: ./docker-compose.yml
+      - run: sleep 5s
       - run: mv .env-test .env
       - run: cd crypto_database && diesel migration run
       - run: cd ..
