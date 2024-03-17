@@ -14,12 +14,13 @@ jobs:
         with:
           crate: diesel_cli
           features: postgres
+      - uses: isbang/compose-action@v1.5.1
+        with:
+          compose-file: ./docker-compose.yml
       - run: echo "DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data" >> .env
-      - run: docker compose up -d
       - run: cd crypto_database && diesel migration run
       - run: cd ..
       - run: cargo test --workspace
-      - run: docker compose down
 
   build:
     name: cargo build
