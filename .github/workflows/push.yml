@@ -10,8 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: diesel_cli
       - run: echo "DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data" >> .env
-      - run: cargo install diesel_cli
       - run: docker compose up -d
       - run: cd crypto_database && disel migration run
       - run: cd ..
