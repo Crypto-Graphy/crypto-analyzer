@@ -17,7 +17,7 @@ jobs:
       - uses: isbang/compose-action@v1.5.1
         with:
           compose-file: ./docker-compose.yml
-      - run: echo "DATABASE_URL=postgres://super_user:password@0.0.0.0:5432/crypto_data" >> .env
+      - run: mv .env-example .env
       - run: cd crypto_database && diesel migration run
       - run: cd ..
       - run: cargo test --workspace
